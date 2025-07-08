@@ -2,6 +2,12 @@
 
 > **Automate your AI/Dev environment with intelligent LLM-based installation, healing, and validation.**
 
+## 🎯 TL;DR
+
+**Stop wasting hours setting up development environments manually.** CONFIGO is an AI agent that automatically installs, configures, and validates your entire dev stack in minutes. Just describe what you're building, and it handles the rest with intelligent recommendations, self-healing capabilities, and persistent memory.
+
+**Why CONFIGO?** Because your time is better spent coding, not configuring.
+
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Build](https://img.shields.io/badge/build-passing-brightgreen)]()
@@ -11,12 +17,12 @@
 <div align="center">
 
 ```
-██╗ ██████╗ ██████╗ ███╗   ██╗███████╗██╗ ██████╗ 
-██║██╔════╝██╔═══██╗████╗  ██║██╔════╝██║██╔═══██╗
-██║██║     ██║   ██║██╔██╗ ██║█████╗  ██║██║   ██║
-██║██║     ██║   ██║██║╚██╗██║██╔══╝  ██║██║   ██║
-██║╚██████╗╚██████╔╝██║ ╚████║██║     ██║╚██████╔╝
-╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝ 
+  ██████╗  ██████╗ ███╗  ██╗███╗   ██╗ ██████╗  ██████╗ 
+ ██╔═══██╗██╔═══██╗████╗ ██║████╗  ██║██╔═══██╗██╔═══██╗
+ ██║   ██║██║   ██║██╔██╗██║██╔██╗ ██║██║   ██║██║   ██║
+ ██║   ██║██║   ██║██║╚████║██║╚██╗██║██║   ██║██║   ██║
+ ╚██████╔╝╚██████╔╝██║ ╚███║██║ ╚████║╚██████╔╝╚██████╔╝
+  ╚═════╝  ╚═════╝ ╚═╝  ╚══╝╚═╝  ╚═══╝ ╚═════╝  ╚═════╝ 
 ```
 
 **The intelligent development environment agent that learns, adapts, and heals itself**
@@ -46,21 +52,27 @@
 
 ```mermaid
 flowchart TD
-    A[👤 User describes environment] --> B[🧠 Gemini API generates stack]
-    B --> C[📋 CONFIGO builds installation plan]
-    C --> D[⚙️ Shell executor installs tools]
-    D --> E{✅ Tool succeeds?}
-    E -->|Yes| F[🎉 Mark as installed]
-    E -->|No| G[🔧 Ask Gemini for fix]
-    G --> H[🔄 Retry with new approach]
+    A[👤 User Input<br/>"Python web dev with Django"] --> B[🧠 AI Analysis<br/>Gemini generates optimal stack]
+    B --> C[📋 Smart Planning<br/>Dependencies & order optimized]
+    C --> D[⚙️ Automated Installation<br/>Tools installed automatically]
+    D --> E{✅ Success?}
+    E -->|Yes| F[🎉 Validation<br/>Tools tested & verified]
+    E -->|No| G[🔧 Self-Healing<br/>AI generates fixes]
+    G --> H[🔄 Intelligent Retry<br/>New approach applied]
     H --> E
-    F --> I[📊 Validation & reporting]
-    I --> J[💾 Update memory for future]
+    F --> I[📊 Results Report<br/>Success metrics & status]
+    I --> J[💾 Memory Update<br/>Learn for future setups]
     
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style G fill:#fff3e0
-    style F fill:#e8f5e8
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style C fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    style D fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style E fill:#ffebee,stroke:#d32f2f,stroke-width:2px
+    style F fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    style G fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style H fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style I fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style J fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
 ```
 
 ---
@@ -110,31 +122,33 @@ python main.py portal
 🚀 CONFIGO: Autonomous AI Setup Agent
 🧠 Memory • 📋 Planning • 🔧 Self-Healing • ✅ Validation
 
-🧠 Memory Context
-┌─────────────────────────────────────┐
-│ Memory Statistics                   │
-├─────────────────────────────────────┤
-│ Total Tools: 15                     │
-│ Successful Installations: 12        │
-│ Failed Installations: 3             │
-│ Total Sessions: 8                   │
-│ Success Rate: 80.0%                 │
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│ 🧠 Memory Context                                       │
+├─────────────────────────────────────────────────────────┤
+│ 📊 Total Tools Installed: 15                            │
+│ ✅ Successful Installations: 12                         │
+│ ❌ Failed Installations: 3                              │
+│ 📈 Success Rate: 80.0%                                  │
+│ 🎯 Learning from 8 previous sessions                    │
+└─────────────────────────────────────────────────────────┘
 
 📋 Planning: Python Web Development Environment
-✅ Step 1/5: Install Python 3.11
-✅ Step 2/5: Install pip and virtualenv
-🔄 Step 3/5: Install Django
-⏳ Step 4/5: Install PostgreSQL
-⏳ Step 5/5: Install Redis
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Step 1/5: Python 3.11 installed successfully
+✅ Step 2/5: pip & virtualenv configured
+🔄 Step 3/5: Installing Django (in progress...)
+⏳ Step 4/5: PostgreSQL (pending)
+⏳ Step 5/5: Redis (pending)
 
-🔍 Validation Results
-┌─────────────────────────────────────┐
-│ ✅ Status: HEALTHY                  │
-│ 📊 Success Rate: 100.0%             │
-│ ✅ Valid Tools: 5/5                 │
-│ ⏱️ Avg Validation Time: 1.2s        │
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│ 🔍 Validation Results                                   │
+├─────────────────────────────────────────────────────────┤
+│ ✅ Status: HEALTHY                                      │
+│ 📊 Success Rate: 100.0%                                 │
+│ ✅ Valid Tools: 5/5                                     │
+│ ⏱️ Avg Validation Time: 1.2s                            │
+│ 🎯 Environment Ready for Development                    │
+└─────────────────────────────────────────────────────────┘
 ```
 
 </div>
@@ -253,37 +267,52 @@ python main.py portal
 
 ```mermaid
 graph TB
-    subgraph "CONFIGO Core"
-        A[main.py] --> B[Enhanced LLM Agent]
-        B --> C[Memory System]
-        C --> D[Planner]
-        D --> E[Validator]
-        E --> F[Self-Healing Engine]
+    subgraph "🧠 CONFIGO Core"
+        A[🚀 main.py<br/>Entry Point] --> B[🤖 Enhanced LLM Agent<br/>AI Intelligence]
+        B --> C[💾 Memory System<br/>Persistent Learning]
+        C --> D[📋 Planner<br/>Installation Strategy]
+        D --> E[✅ Validator<br/>Quality Assurance]
+        E --> F[🔧 Self-Healing Engine<br/>Error Recovery]
     end
     
-    subgraph "External APIs"
-        G[Gemini API]
-        H[mem0 Memory]
+    subgraph "🌐 External Services"
+        G[🔑 Gemini API<br/>LLM Provider]
+        H[🧠 mem0 Memory<br/>Cloud Storage]
     end
     
-    subgraph "UI Layer"
-        I[Rich Terminal UI]
-        J[Enhanced Messages]
-        K[Modern Layout]
+    subgraph "🎨 User Interface"
+        I[🖥️ Rich Terminal UI<br/>Beautiful Interface]
+        J[💬 Enhanced Messages<br/>Clear Communication]
+        K[📐 Modern Layout<br/>Responsive Design]
     end
     
-    subgraph "Installation Layer"
-        L[Tool Installer]
-        M[Extension Manager]
-        N[Portal Orchestrator]
+    subgraph "⚙️ Installation Layer"
+        L[📦 Tool Installer<br/>Package Management]
+        M[🔌 Extension Manager<br/>IDE Integration]
+        N[🌐 Portal Orchestrator<br/>Service Login]
     end
     
-    B --> G
-    C --> H
+    B -.->|API Calls| G
+    C -.->|Memory Sync| H
     A --> I
     A --> L
     A --> M
     A --> N
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style C fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    style D fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style E fill:#ffebee,stroke:#d32f2f,stroke-width:2px
+    style F fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style G fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style H fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    style I fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style J fill:#ffebee,stroke:#d32f2f,stroke-width:2px
+    style K fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style L fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style M fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    style N fill:#fff3e0,stroke:#f57c00,stroke-width:2px
 ```
 
 ---
