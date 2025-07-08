@@ -386,4 +386,4 @@ audit-logs/
 # 🎯 PROJECT SPECIFIC
 # =============================================================================
 # CONFIGO specific exclusions
-# Add any project-specific files that should not be tracked 
+# Add any project-specific files that should not be tracked *.pyc
