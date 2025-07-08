@@ -1,0 +1,9 @@
+{
+  "preferred_editor": "VS Code",
+  "skip_already_installed": true,
+  "auto_retry_failed": true,
+  "max_retry_attempts": 3,
+  "preferred_package_manager": "apt-get",
+  "auto_open_login_portals": true,
+  "show_improvement_suggestions": true
+}

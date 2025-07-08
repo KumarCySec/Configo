@@ -1,0 +1,59 @@
+{
+  "entries": [
+    {
+      "content": "Session started: session_20250708_161323, Environment: full stack AI",
+      "metadata": {
+        "type": "session_start",
+        "session_id": "session_20250708_161323",
+        "environment": "full stack AI",
+        "timestamp": "2025-07-08T16:13:23.352739"
+      },
+      "timestamp": "2025-07-08T16:13:23.353540",
+      "tags": []
+    },
+    {
+      "content": "Session ended: session_20250708_161323, Duration: 0:00:31.085543",
+      "metadata": {
+        "type": "session_end",
+        "session_id": "session_20250708_161323",
+        "duration": "0:00:31.085543",
+        "timestamp": "2025-07-08T16:13:54.438282"
+      },
+      "timestamp": "2025-07-08T16:13:54.439258",
+      "tags": []
+    },
+    {
+      "content": "Session started: session_20250708_162528, Environment: ai",
+      "metadata": {
+        "type": "session_start",
+        "session_id": "session_20250708_162528",
+        "environment": "ai",
+        "timestamp": "2025-07-08T16:25:28.502793"
+      },
+      "timestamp": "2025-07-08T16:25:28.503864",
+      "tags": []
+    },
+    {
+      "content": "Session started: session_20250709_000956, Environment: Data Science",
+      "metadata": {
+        "type": "session_start",
+        "session_id": "session_20250709_000956",
+        "environment": "Data Science",
+        "timestamp": "2025-07-09T00:09:56.299343"
+      },
+      "timestamp": "2025-07-09T00:09:56.300154",
+      "tags": []
+    },
+    {
+      "content": "Session ended: session_20250709_000956, Duration: 0:00:38.473222",
+      "metadata": {
+        "type": "session_end",
+        "session_id": "session_20250709_000956",
+        "duration": "0:00:38.473222",
+        "timestamp": "2025-07-09T00:10:34.772565"
+      },
+      "timestamp": "2025-07-09T00:10:34.773293",
+      "tags": []
+    }
+  ]
+}
