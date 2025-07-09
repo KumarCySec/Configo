@@ -680,3 +680,122 @@ Return only the command, no explanations or YAML formatting.
         }
         
         return justifications.get(tool_name, f"Required for {tool_name} development workflow")
+
+    def get_install_plan(self, app_name: str, system_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Generate installation plan for an app using natural language.
+        
+        Args:
+            app_name: Name of the app to install (e.g., "Discord", "Chrome")
+            system_info: System information from get_system_info()
+            
+        Returns:
+            Optional[Dict[str, Any]]: Installation plan in YAML format or None if failed
+        """
+        try:
+            # Create prompt for app installation
+            prompt = f"""
+I am using:
+- OS: {system_info['os']}
+- Distro: {system_info['distro']}
+- Architecture: {system_info['arch']}
+- Package managers: {', '.join(system_info['package_managers'])}
+
+Please give me a complete installation plan for "{app_name}":
+
+1. Best command to install "{app_name}"
+2. Check command (to validate install)
+3. How to launch it
+4. Optional icon path or shortcut instructions
+5. Fallback: download URL if not available in packages
+
+Return in clean YAML format:
+```yaml
+app: "{app_name}"
+method: "package_manager_name"
+install: |
+  command1
+  command2
+check: "command to check if installed"
+launch: "command to launch app"
+desktop_entry:
+  path: "/path/to/desktop/file.desktop"
+  icon: "/path/to/icon.png"
+fallback_url: "https://download.url/if/needed"
+```
+
+IMPORTANT: 
+- Use the available package managers: {', '.join(system_info['package_managers'])}
+- For Linux, prefer apt, snap, or flatpak
+- For macOS, use brew or direct download
+- For Windows, use winget, choco, or direct download
+- Return ONLY the YAML, no explanations
+"""
+            
+            # Generate response from LLM
+            raw_response = self.llm_client.generate_config(prompt) or ""
+            
+            # Parse YAML response
+            if raw_response.strip():
+                # Extract YAML from response if it's wrapped in code blocks
+                yaml_content = raw_response.strip()
+                if yaml_content.startswith("```yaml"):
+                    yaml_content = yaml_content.split("\n", 1)[1]
+                if yaml_content.endswith("```"):
+                    yaml_content = yaml_content.rsplit("\n", 1)[0]
+                
+                # Parse YAML
+                import yaml
+                plan = yaml.safe_load(yaml_content)
+                
+                if plan and isinstance(plan, dict):
+                    logger.info(f"Generated install plan for {app_name}: {plan.get('method', 'unknown')}")
+                    return plan
+            
+        except Exception as e:
+            logger.error(f"Failed to generate install plan for {app_name}: {e}")
+        
+        return None
+
+    def get_error_fix(self, command: str, error: str, app_name: str) -> Optional[str]:
+        """
+        Generate a fixed command for a failed app installation.
+        
+        Args:
+            command: The failed command
+            error: The error output
+            app_name: Name of the app that failed
+            
+        Returns:
+            Optional[str]: Fixed command or None if generation fails
+        """
+        try:
+            # Create enhanced fix prompt
+            fix_prompt = f"""
+I ran the following command to install {app_name}:
+
+Command: {command}
+Error: {error}
+
+Please suggest a corrected command or workaround.
+Respond with only the fixed command (no explanation).
+"""
+            
+            # Use the LLM client to generate a fix
+            fixed_command = self.llm_client.generate_config(fix_prompt)
+            if fixed_command and fixed_command.strip():
+                # Clean up the response
+                fixed_command = fixed_command.strip()
+                # Remove any markdown formatting
+                if fixed_command.startswith("```"):
+                    fixed_command = fixed_command.split("\n", 1)[1] if "\n" in fixed_command else ""
+                if fixed_command.endswith("```"):
+                    fixed_command = fixed_command.rsplit("\n", 1)[0] if "\n" in fixed_command else ""
+                
+                logger.info(f"Generated fix for {app_name}: {fixed_command}")
+                return fixed_command
+            
+        except Exception as e:
+            logger.error(f"Failed to generate error fix for {app_name}: {e}")
+        
+        return None

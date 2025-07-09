@@ -1171,25 +1171,114 @@ class AgentMemory:
         pass
     
     def get_profile_context(self, profile_id: str) -> str:
+        """Get context string for a specific profile."""
+        profile = self._get_profile_by_id(profile_id)
+        if not profile:
+            return ""
+        
+        context = f"Profile: {profile.name}\n"
+        context += f"Created: {profile.created_at.strftime('%Y-%m-%d')}\n"
+        context += f"Last Used: {profile.last_used.strftime('%Y-%m-%d %H:%M') if profile.last_used else 'Never'}\n"
+        context += f"Installed Tools: {', '.join(profile.installed_tools)}\n"
+        context += f"Preferences: {profile.preferences}\n"
+        
+        return context
+
+    def record_app_install(self, app_name: str, plan: Dict[str, Any], result: Dict[str, Any]) -> None:
         """
-        Get context for a specific profile.
+        Record app installation information to memory.
         
         Args:
-            profile_id: Profile ID
+            app_name: Name of the installed app
+            plan: Original installation plan
+            result: Installation result
+        """
+        try:
+            # Create app installation record
+            app_record = {
+                'app_name': app_name,
+                'installed_at': datetime.now().isoformat(),
+                'method': result.get('method', 'unknown'),
+                'success': result.get('success', False),
+                'version': result.get('version'),
+                'launch_command': result.get('launch_command', ''),
+                'desktop_entry': result.get('desktop_entry', {}),
+                'error': result.get('error'),
+                'install_commands': result.get('install_commands', [])
+            }
+            
+            # Load existing installed apps
+            installed_apps_file = self.memory_dir / 'installed_apps.json'
+            installed_apps = {}
+            
+            if installed_apps_file.exists():
+                try:
+                    with open(installed_apps_file, 'r') as f:
+                        installed_apps = json.load(f)
+                except Exception as e:
+                    logger.error(f"Error loading installed apps: {e}")
+                    installed_apps = {}
+            
+            # Add/update app record
+            installed_apps[app_name] = app_record
+            
+            # Save to file
+            with open(installed_apps_file, 'w') as f:
+                json.dump(installed_apps, f, indent=2)
+            
+            # Also save to semantic memory for context
+            memory_context = f"App {app_name} was installed using {result.get('method', 'unknown')} method. "
+            if result.get('success'):
+                memory_context += f"Installation was successful. Launch command: {result.get('launch_command', 'N/A')}"
+            else:
+                memory_context += f"Installation failed: {result.get('error', 'Unknown error')}"
+            
+            self.save_to_memory(
+                memory_context,
+                metadata={
+                    'type': 'app_installation',
+                    'app_name': app_name,
+                    'success': result.get('success', False),
+                    'method': result.get('method', 'unknown')
+                }
+            )
+            
+            logger.info(f"Recorded app installation: {app_name}")
+            
+        except Exception as e:
+            logger.error(f"Error recording app installation for {app_name}: {e}")
+
+    def get_installed_apps(self) -> Dict[str, Any]:
+        """
+        Get all installed apps from memory.
+        
+        Returns:
+            Dict[str, Any]: Dictionary of installed apps
+        """
+        try:
+            installed_apps_file = self.memory_dir / 'installed_apps.json'
+            if installed_apps_file.exists():
+                with open(installed_apps_file, 'r') as f:
+                    return json.load(f)
+        except Exception as e:
+            logger.error(f"Error loading installed apps: {e}")
+        
+        return {}
+
+    def is_app_installed(self, app_name: str) -> bool:
+        """
+        Check if an app is already installed.
+        
+        Args:
+            app_name: Name of the app to check
             
         Returns:
-            Context string for the profile
+            bool: True if app is installed, False otherwise
         """
-        if profile_id not in self.profiles:
-            return f"Profile {profile_id} not found"
+        installed_apps = self.get_installed_apps()
+        app_record = installed_apps.get(app_name)
         
-        profile = self.profiles[profile_id]
-        context_parts = [
-            f"Profile: {profile.name}",
-            f"Created: {profile.created_at.strftime('%Y-%m-%d')}",
-            f"Last used: {profile.last_used.strftime('%Y-%m-%d') if profile.last_used else 'Never'}",
-            f"Installed tools: {', '.join(profile.installed_tools) if profile.installed_tools else 'None'}",
-            f"Preferences: editor={profile.preferences.preferred_editor}, package_manager={profile.preferences.preferred_package_manager}"
-        ]
+        if app_record:
+            return app_record.get('success', False)
         
-        return "\n".join(context_parts) 
+        return False 

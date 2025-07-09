@@ -7,4 +7,5 @@ rich
 pyfiglet
 prompt_toolkit
 textual
-mem0ai>=0.1.0 
+mem0ai>=0.1.0
+distro>=1.8.0 

@@ -586,80 +586,190 @@ def scan_mode() -> None:
 
 def portal_mode() -> None:
     """
-    Portal management mode for CONFIGO.
+    Portal orchestration mode for opening login portals.
     
-    Manages AI service login portals and CLI tools:
-    - Opens browser portals for service logins
-    - Installs CLI tools for various services
-    - Checks login status across services
-    - Manages portal history and preferences
-    
-    Uses the PortalOrchestrator for portal management and ModernUI for interface.
+    Allows users to open various development service portals
+    for authentication and account setup.
     """
     setup_logging()
     logger = logging.getLogger(__name__)
     
+    # Initialize UI components
+    console = Console()
+    messages = EnhancedMessageDisplay(console)
+    
     try:
-        # Initialize components
+        # Show portal mode banner
+        messages.show_autonomous_banner()
+        
+        # Initialize memory and portal orchestrator
         memory = AgentMemory()
-        portal_orchestrator = PortalOrchestrator(memory)
-        ui = ModernUI()
+        orchestrator = PortalOrchestrator(memory)
         
-        # Show banner
-        ui.show_banner()
+        # Get available portals
+        available_portals = orchestrator.get_available_portals()
         
-        # Show portal status
-        ui.show_portal_status(portal_orchestrator)
+        if not available_portals:
+            messages.show_error_with_context("No portals available. Please configure portals first.")
+            return
         
-        # Get user action
-        action = ui.get_user_input("Choose action (open/install/check/exit): ").lower()
+        # Display portal options
+        messages.show_portal_options(available_portals)
         
-        if action == "open":
-            portal_name = ui.get_user_input("Enter portal name (claude/gemini/grok/chatgpt/cursor/github): ")
-            if portal_orchestrator.open_login_portal(portal_name):
-                ui.show_success_message(f"Opened {portal_name} login portal!")
-            else:
-                ui.show_error_message(f"Failed to open {portal_name} portal")
+        # Get user selection
+        console.print("[bold cyan]Enter portal name to open: [/bold cyan]", end="")
+        portal_name = input().strip()
         
-        elif action == "install":
-            portal_name = ui.get_user_input("Enter portal name to install CLI tool: ")
-            success, message = portal_orchestrator.install_cli_tool(portal_name)
+        if portal_name in available_portals:
+            # Open the selected portal
+            success = orchestrator.open_portal(portal_name)
             if success:
-                ui.show_success_message(message)
+                messages.show_portal_opened(portal_name, available_portals[portal_name]['url'])
             else:
-                ui.show_error_message("Installation failed", message)
-        
-        elif action == "check":
-            portal_name = ui.get_user_input("Enter portal name to check login status: ")
-            is_logged_in = portal_orchestrator.check_login_status(portal_name)
-            if is_logged_in:
-                ui.show_success_message(f"Logged in to {portal_name}!")
-            else:
-                ui.show_error_message(f"Not logged in to {portal_name}")
-        
+                messages.show_error_with_context(f"Failed to open {portal_name}")
+        else:
+            messages.show_error_with_context(f"Portal '{portal_name}' not found")
+            
+    except KeyboardInterrupt:
+        messages.show_aborted_message()
     except Exception as e:
-        logger.error(f"Portal mode failed: {e}")
-        print(f"\n💥 Portal mode failed: {e}")
-        sys.exit(1)
+        logger.error(f"Error in portal mode: {e}")
+        messages.show_error_with_context(f"Portal mode error: {e}")
 
+def app_install_mode() -> None:
+    """
+    Natural language app installation mode.
+    
+    Allows users to install applications using natural language:
+    "Install Discord", "I need Chrome", etc.
+    """
+    setup_logging()
+    logger = logging.getLogger(__name__)
+    
+    # Initialize UI components
+    console = Console()
+    messages = EnhancedMessageDisplay(console)
+    
+    try:
+        # Show app installer banner
+        messages.show_autonomous_banner()
+        
+        # Initialize memory and LLM agent
+        memory = AgentMemory()
+        llm_agent = EnhancedLLMAgent(memory)
+        
+        # Get system information
+        from core.system import get_system_info
+        system_info = get_system_info()
+        
+        # Get app name from user using natural language
+        user_input = messages.show_app_install_prompt()
+        if not user_input:
+            messages.show_error_with_context("No app specified. Exiting.")
+            return
+        
+        # Extract clean app name using intelligent NLP
+        from core.app_name_extractor import AppNameExtractor
+        app_name = AppNameExtractor.extract_app_name(user_input)
+        
+        # Show app name extraction result
+        messages.show_app_name_extraction(user_input, app_name)
+        
+        # Validate extracted app name
+        if not AppNameExtractor.validate_app_name(app_name):
+            messages.show_error_with_context(f"Could not extract a valid app name from '{user_input}'. Please try again with a clearer request.")
+            return
+        
+        # Check if already installed
+        if memory.is_app_installed(app_name):
+            messages.show_already_installed(app_name)
+            return
+        
+        # Show installation start with system information
+        messages.show_app_install_start(app_name, system_info)
+        
+        # Generate installation plan using LLM
+        logger.info(f"Generating install plan for {app_name}")
+        messages.show_install_progress(app_name, "Generating installation plan with AI...", 1)
+        
+        plan = llm_agent.get_install_plan(app_name, system_info)
+        
+        if not plan:
+            messages.show_installation_failed(app_name, "Could not generate installation plan", [
+                "Check your internet connection",
+                "Verify the app name is correct",
+                "Try a different app name"
+            ])
+            return
+        
+        # Show the plan and ask for confirmation
+        if not messages.show_install_confirmation(app_name, plan):
+            messages.show_aborted_message()
+            return
+        
+        # Execute the installation plan with enhanced progress tracking
+        from core.shell_executor import ShellExecutor
+        executor = ShellExecutor(max_retries=3)
+        
+        logger.info(f"Executing install plan for {app_name}")
+        result = executor.execute_install_plan(plan, llm_agent, messages)
+        
+        # Record installation in memory
+        memory.record_app_install(app_name, plan, result)
+        
+        # Show comprehensive result
+        if result['success']:
+            messages.show_installation_complete(app_name, result)
+        else:
+            # Generate helpful suggestions based on the error
+            suggestions = []
+            error = result.get('error', 'Unknown error')
+            
+            if 'not found' in error.lower() or 'package' in error.lower():
+                suggestions.append("The package might not be available in your distribution's repositories")
+                suggestions.append("Try using a different package manager (snap, flatpak)")
+                suggestions.append("Check if the app name is spelled correctly")
+            elif 'permission' in error.lower():
+                suggestions.append("Try running with sudo or check your user permissions")
+            elif 'network' in error.lower() or 'connection' in error.lower():
+                suggestions.append("Check your internet connection")
+                suggestions.append("Try updating your package lists first")
+            
+            messages.show_installation_failed(app_name, error, suggestions)
+            
+    except KeyboardInterrupt:
+        messages.show_aborted_message()
+    except Exception as e:
+        logger.error(f"Error in app install mode: {e}")
+        messages.show_error_with_context(f"App installation error: {e}")
 
 if __name__ == "__main__":
-    import argparse
+    import sys
     
-    parser = argparse.ArgumentParser(description="CONFIGO - Intelligent Development Environment Agent")
-    parser.add_argument("mode", nargs="?", default="setup", 
-                       choices=["setup", "chat", "scan", "portal"],
-                       help="Mode to run CONFIGO in")
-    parser.add_argument("--debug", action="store_true", 
-                       help="Enable debug mode for chat (shows LLM input/output)")
-    
-    args = parser.parse_args()
-    
-    if args.mode == "chat":
-        chat_mode()
-    elif args.mode == "scan":
-        scan_mode()
-    elif args.mode == "portal":
-        portal_mode()
+    # Check for command line arguments
+    if len(sys.argv) > 1:
+        mode = sys.argv[1].lower()
+        
+        if mode == "chat":
+            chat_mode()
+        elif mode == "scan":
+            scan_mode()
+        elif mode == "portal":
+            portal_mode()
+        elif mode == "install":
+            app_install_mode()
+        elif mode == "help":
+            print("CONFIGO - Autonomous AI Setup Agent")
+            print("\nAvailable modes:")
+            print("  main.py          - Full development environment setup")
+            print("  main.py chat     - Interactive chat mode")
+            print("  main.py scan     - Project scanning mode")
+            print("  main.py portal   - Login portal orchestration")
+            print("  main.py install  - Natural language app installation")
+            print("  main.py help     - Show this help")
+        else:
+            print(f"Unknown mode: {mode}")
+            print("Use 'main.py help' for available modes")
     else:
+        # Default mode - full development environment setup
         main() 

@@ -170,8 +170,8 @@ class EnhancedMessageDisplay:
         ))
         self.console.print()
     
-    def show_validation_start(self):
-        """Show validation process start"""
+    def show_environment_validation_start(self):
+        """Show environment validation process start"""
         self.console.print()
         self.console.print(Panel(
             "[bold blue]🔍 Starting Environment Validation[/bold blue]\n"
@@ -702,8 +702,8 @@ class EnhancedMessageDisplay:
         self.console.print("[yellow]🧹 All memory data has been cleared.[/yellow]")
         self.console.print("[dim]💡 The agent will start fresh on the next run.[/dim]")
     
-    def show_retry_attempt(self, tool_name: str, attempt: int, max_attempts: int) -> None:
-        """Show retry attempt information."""
+    def show_tool_retry_attempt(self, tool_name: str, attempt: int, max_attempts: int) -> None:
+        """Show retry attempt information for tools."""
         self.console.print(f"[yellow]🔄 Retrying {tool_name} (attempt {attempt}/{max_attempts})[/yellow]")
     
     def show_plan_execution_progress(self, progress: Dict[str, Any]) -> None:
@@ -732,28 +732,179 @@ class EnhancedMessageDisplay:
     def show_domain_detection(self, detected_domain: str, confidence: float) -> None:
         """Show domain detection results."""
         self.console.print()
-        self.console.rule("[bold purple]🎯 Domain Detection[/bold purple]", style="purple")
+        self.console.print(Panel(
+            f"[bold blue]🎯 Domain Detection[/bold blue]\n"
+            f"Detected: [cyan]{detected_domain}[/cyan]\n"
+            f"Confidence: [yellow]{confidence:.1%}[/yellow]",
+            title="🧠 AI Analysis",
+            border_style="blue"
+        ))
+        self.console.print()
+
+    def show_app_install_prompt(self) -> str:
+        """Show prompt for app installation."""
+        self.console.print()
+        self.console.print(Panel(
+            "[bold magenta]🚀 CONFIGO App Installer[/bold magenta]\n"
+            "[dim]Simply tell me what app you want to install![/dim]\n\n"
+            "[bold]Examples:[/bold]\n"
+            "• Install Discord\n"
+            "• I need Chrome\n"
+            "• Get me Zoom\n"
+            "• Install Slack",
+            title="📱 Natural Language App Installation",
+            border_style="magenta"
+        ))
+        self.console.print()
         
-        domain_names = {
-            "ai_ml": "AI/ML Development",
-            "web_dev": "Web Development",
-            "data_science": "Data Science",
-            "devops": "DevOps/Infrastructure"
-        }
+        self.console.print("[bold cyan]What app do you want to install? [/bold cyan]", end="")
+        return input().strip()
+
+    def show_app_install_start(self, app_name: str, system_info: Dict[str, Any]) -> None:
+        """Show app installation start."""
+        self.console.print()
+        self.console.print(Panel(
+            f"[bold green]🚀 Installing {app_name}[/bold green]\n"
+            f"OS: [cyan]{system_info['os']}[/cyan]\n"
+            f"Architecture: [cyan]{system_info['arch']}[/cyan]\n"
+            f"Package Managers: [cyan]{', '.join(system_info['package_managers'])}[/cyan]",
+            title="📱 App Installation",
+            border_style="green"
+        ))
+        self.console.print()
+
+    def show_install_plan(self, plan: Dict[str, Any]) -> None:
+        """Show the generated installation plan."""
+        self.console.print()
+        self.console.print(Panel(
+            f"[bold blue]📋 Installation Plan[/bold blue]\n"
+            f"App: [cyan]{plan.get('app', 'Unknown')}[/cyan]\n"
+            f"Method: [cyan]{plan.get('method', 'unknown')}[/cyan]\n"
+            f"Launch: [cyan]{plan.get('launch', 'N/A')}[/cyan]",
+            title="🧠 AI-Generated Plan",
+            border_style="blue"
+        ))
+        self.console.print()
+
+    def show_install_progress(self, app_name: str, message: str, step: int = 1) -> None:
+        """Show detailed installation progress with step information."""
+        self.console.print(f"[yellow]🔄 {app_name}: {message} (Step {step})[/yellow]")
+
+    def show_install_confirmation(self, app_name: str, plan: Dict[str, Any]) -> bool:
+        """Show installation plan and ask for confirmation."""
+        self.console.print()
+        self.console.print(Panel(
+            f"[bold blue]📋 Installation Plan for {app_name}[/bold blue]\n\n"
+            f"🔧 [bold]Method:[/bold] {plan.get('method', 'unknown')}\n"
+            f"🚀 [bold]Launch Command:[/bold] {plan.get('launch', 'N/A')}\n"
+            f"✅ [bold]Check Command:[/bold] {plan.get('check', 'N/A')}\n\n"
+            f"[dim]Installation commands will be executed automatically with error recovery.[/dim]",
+            title="🧠 AI-Generated Plan",
+            border_style="blue"
+        ))
+        self.console.print()
         
-        domain_name = domain_names.get(detected_domain, detected_domain)
-        confidence_color = "green" if confidence >= 0.8 else "yellow" if confidence >= 0.6 else "red"
+        self.console.print("[bold yellow]Proceed with installation? (Y/n): [/bold yellow]", end="")
+        response = input().strip().lower()
+        return response in ['', 'y', 'yes']
+
+    def show_installation_complete(self, app_name: str, result: Dict[str, Any]) -> None:
+        """Show comprehensive installation completion message."""
+        self.console.print()
         
-        self.console.print(f"[bold cyan]🎯 Detected Domain: {domain_name}[/bold cyan]")
-        self.console.print(f"[{confidence_color}]📊 Confidence: {confidence:.1f}[/{confidence_color}]")
+        # Create success message with detailed information
+        success_parts = [
+            f"[bold green]✅ {app_name} has been installed successfully![/bold green]\n"
+        ]
         
-        # Domain-specific information
-        domain_info = {
-            "ai_ml": "Focusing on AI/ML tools: Python, Jupyter, Cursor, AI extensions",
-            "web_dev": "Focusing on web development: Node.js, VS Code, web extensions",
-            "data_science": "Focusing on data science: Python, Jupyter, data analysis tools",
-            "devops": "Focusing on DevOps: Docker, Terraform, cloud CLI tools"
-        }
+        # Add launch information
+        launch_cmd = result.get('launch_command', '')
+        if launch_cmd:
+            success_parts.append(f"🚀 [bold]Launch Command:[/bold] [cyan]{launch_cmd}[/cyan]")
         
-        info = domain_info.get(detected_domain, "Using general development tools")
-        self.console.print(f"[dim]💡 {info}[/dim]") 
+        # Add version information
+        version = result.get('version', '')
+        if version:
+            success_parts.append(f"📦 [bold]Version:[/bold] [cyan]{version}[/cyan]")
+        
+        # Add desktop integration status
+        if result.get('desktop_entry_created', False):
+            success_parts.append(f"🎨 [bold]Desktop Integration:[/bold] [green]✓ Created[/green]")
+        else:
+            success_parts.append(f"🎨 [bold]Desktop Integration:[/bold] [yellow]⚠ Not created[/yellow]")
+        
+        # Add launch instructions
+        success_parts.append(f"\n📍 [bold]You can launch it from:[/bold]")
+        success_parts.append(f"• [cyan]Applications Menu[/cyan] (Show Applications)")
+        if launch_cmd:
+            success_parts.append(f"• [cyan]Terminal:[/cyan] [cyan]{launch_cmd}[/cyan]")
+        
+        # Add memory information
+        success_parts.append(f"\n🧠 [dim]CONFIGO remembers this installation for future sessions.[/dim]")
+        
+        self.console.print(Panel(
+            "\n".join(success_parts),
+            title="🎉 Installation Complete",
+            border_style="green"
+        ))
+        self.console.print()
+
+    def show_installation_failed(self, app_name: str, error: str, suggestions: Optional[List[str]] = None) -> None:
+        """Show detailed installation failure message with suggestions."""
+        self.console.print()
+        
+        failure_parts = [
+            f"[bold red]❌ Failed to install {app_name}[/bold red]\n\n"
+            f"[red]Error: {error}[/red]\n"
+        ]
+        
+        if suggestions:
+            failure_parts.append(f"\n💡 [bold]Suggestions:[/bold]")
+            for suggestion in suggestions:
+                failure_parts.append(f"• {suggestion}")
+        
+        failure_parts.append(f"\n[dim]You may need to install this app manually or check your system requirements.[/dim]")
+        
+        self.console.print(Panel(
+            "\n".join(failure_parts),
+            title="💥 Installation Failed",
+            border_style="red"
+        ))
+        self.console.print()
+
+    def show_retry_attempt(self, app_name: str, attempt: int, max_attempts: int, error: str) -> None:
+        """Show retry attempt information."""
+        self.console.print(f"[yellow]🔄 Retry attempt {attempt}/{max_attempts} for {app_name}[/yellow]")
+        self.console.print(f"[dim]Previous error: {error}[/dim]")
+
+    def show_ai_fix_generated(self, app_name: str, original_cmd: str, fixed_cmd: str) -> None:
+        """Show when AI generates a fix for a failed command."""
+        self.console.print(f"[cyan]🤖 AI generated fix for {app_name}:[/cyan]")
+        self.console.print(f"[dim]Original: {original_cmd}[/dim]")
+        self.console.print(f"[green]Fixed: {fixed_cmd}[/green]")
+
+    def show_desktop_integration_status(self, app_name: str, success: bool, path: str = "") -> None:
+        """Show desktop integration status."""
+        if success:
+            self.console.print(f"[green]🎨 Desktop shortcut created for {app_name}[/green]")
+            if path:
+                self.console.print(f"[dim]Location: {path}[/dim]")
+        else:
+            self.console.print(f"[yellow]⚠️ Could not create desktop shortcut for {app_name}[/yellow]")
+
+    def show_app_name_extraction(self, original_input: str, extracted_name: str) -> None:
+        """Show app name extraction result."""
+        self.console.print(f"[dim]📝 Extracted app name: '{original_input}' → '{extracted_name}'[/dim]")
+
+    def show_validation_start(self, app_name: str) -> None:
+        """Show validation process start."""
+        self.console.print(f"[blue]🔍 Validating {app_name} installation...[/blue]")
+
+    def show_validation_result(self, app_name: str, success: bool, version: str = "") -> None:
+        """Show validation result."""
+        if success:
+            self.console.print(f"[green]✅ {app_name} validation successful[/green]")
+            if version:
+                self.console.print(f"[dim]Version: {version}[/dim]")
+        else:
+            self.console.print(f"[red]❌ {app_name} validation failed[/red]") 
