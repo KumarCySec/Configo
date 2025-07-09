@@ -1,0 +1,19 @@
+#!/bin/bash
+# Post-removal script for CONFIGO
+# This script runs after the package is removed
+
+set -e
+
+echo "Cleaning up CONFIGO..."
+
+# Remove the installation directory
+if [ -d "/opt/configo" ]; then
+    rm -rf /opt/configo
+    echo "Removed CONFIGO installation directory"
+fi
+
+# Note: We don't remove user configuration directory (~/.config/configo)
+# as it may contain user data they want to keep
+
+echo "CONFIGO cleanup completed."
+echo "Note: User configuration in ~/.config/configo was preserved." 

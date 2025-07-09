@@ -1,0 +1,30 @@
+Package: configo
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: all
+Depends: python3 (>= 3.8), python3-pip, python3-venv
+Recommends: python3-distro
+Maintainer: Kishore Kumar S <kishore.kumar.s@example.com>
+Homepage: https://github.com/yourusername/configo
+Description: CONFIGO - Autonomous AI Setup Agent
+ CONFIGO is an intelligent, memory-aware development environment setup agent
+ that uses LLM-powered recommendations and self-healing capabilities.
+ .
+ Features:
+ • 🧠 Intelligent tool recommendations using AI
+ • 💾 Memory-aware installation history
+ • 🔧 Self-healing error recovery
+ • 📱 Natural language app installation
+ • 🎯 Domain-specific setup optimization
+ • ✅ Comprehensive validation and testing
+ .
+ CONFIGO can automatically install and configure:
+ • Development tools (Python, Node.js, Git, etc.)
+ • IDEs and editors (VS Code, PyCharm, etc.)
+ • Communication apps (Discord, Slack, Telegram, etc.)
+ • Browsers and utilities (Chrome, Firefox, etc.)
+ • And much more via natural language commands
+ .
+ Simply run 'configo' to start the interactive setup,
+ or use 'configo install' for app installation mode. 

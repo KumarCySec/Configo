@@ -1,0 +1,22 @@
+#!/bin/bash
+# CONFIGO - Autonomous AI Setup Agent
+# Launcher script for the CONFIGO CLI
+
+# Set the CONFIGO installation directory
+CONFIGO_DIR="/opt/configo"
+
+# Check if CONFIGO is installed
+if [ ! -d "$CONFIGO_DIR" ]; then
+    echo "Error: CONFIGO is not installed in $CONFIGO_DIR"
+    exit 1
+fi
+
+# Check if main.py exists
+if [ ! -f "$CONFIGO_DIR/main.py" ]; then
+    echo "Error: CONFIGO main script not found in $CONFIGO_DIR"
+    exit 1
+fi
+
+# Change to CONFIGO directory and run the main script
+cd "$CONFIGO_DIR"
+exec python3 main.py "$@" 

@@ -1,0 +1,19 @@
+# Bash completion for CONFIGO
+# Completion script for the CONFIGO Autonomous AI Setup Agent
+
+_configo() {
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    # Available modes
+    opts="install chat scan portal help"
+
+    # If no mode is specified yet, show available modes
+    if [[ ${cur} == * ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+    fi
+}
+
+complete -F _configo configo 
