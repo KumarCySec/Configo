@@ -1,0 +1,20 @@
+{
+  "python": [
+    "pip",
+    "vscode"
+  ],
+  "pip": [
+    "python"
+  ],
+  "vscode": [
+    "python",
+    "git"
+  ],
+  "docker": [
+    "git"
+  ],
+  "git": [
+    "docker",
+    "vscode"
+  ]
+}

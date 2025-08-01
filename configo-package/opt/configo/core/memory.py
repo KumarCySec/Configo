@@ -21,10 +21,39 @@ import os
 import logging
 from typing import Dict, List, Any, Optional, Set
 from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
+from typing import Dict, Any
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+def dataclass_to_dict(obj) -> Dict[str, Any]:
+    """
+    Convert a dataclass instance to a dictionary.
+    
+    This is a replacement for the deprecated asdict function.
+    
+    Args:
+        obj: Dataclass instance to convert
+        
+    Returns:
+        Dict[str, Any]: Dictionary representation of the dataclass
+    """
+    if hasattr(obj, '__dataclass_fields__'):
+        result = {}
+        for field_name, field_info in obj.__dataclass_fields__.items():
+            value = getattr(obj, field_name)
+            if hasattr(value, '__dataclass_fields__'):
+                result[field_name] = dataclass_to_dict(value)
+            elif isinstance(value, (list, tuple)):
+                result[field_name] = [
+                    dataclass_to_dict(item) if hasattr(item, '__dataclass_fields__') else item
+                    for item in value
+                ]
+            else:
+                result[field_name] = value
+        return result
+    return obj
 
 # Try to import mem0, fallback to JSON if not available
 try:
@@ -300,8 +329,16 @@ class AgentMemory:
         # Initialize mem0 if available
         if MEM0_AVAILABLE:
             try:
-                self.mem0_client = Memory()
-                logger.info("mem0 client initialized successfully")
+                # Get mem0 API key from environment
+                mem0_api_key = os.getenv('MEM0_API_KEY')
+                if mem0_api_key:
+                    # Initialize mem0 client with API key
+                    from mem0 import MemoryClient
+                    self.mem0_client = MemoryClient(api_key=mem0_api_key)
+                    logger.info("mem0 client initialized successfully with API key")
+                else:
+                    logger.warning("MEM0_API_KEY not found - mem0 client not initialized")
+                    self.mem0_client = None
             except Exception as e:
                 logger.warning(f"Failed to initialize mem0 client: {e}")
                 self.mem0_client = None
@@ -468,7 +505,7 @@ class AgentMemory:
                     'tools_installed': session.tools_installed,
                     'tools_failed': session.tools_failed,
                     'login_portals': session.login_portals,
-                    'user_preferences': asdict(session.user_preferences),
+                    'user_preferences': dataclass_to_dict(session.user_preferences),
                     'end_time': session.end_time.isoformat() if session.end_time else None
                 }
                 for session_id, session in self.sessions_memory.items()
@@ -478,7 +515,7 @@ class AgentMemory:
             
             # Save user preferences
             with open(self.preferences_file, 'w') as f:
-                json.dump(asdict(self.user_preferences), f, indent=2)
+                json.dump(dataclass_to_dict(self.user_preferences), f, indent=2)
             
             # Save portals memory
             portals_data = {
@@ -498,7 +535,7 @@ class AgentMemory:
                 profile_id: {
                     'name': profile.name,
                     'created_at': profile.created_at.isoformat(),
-                    'preferences': asdict(profile.preferences),
+                    'preferences': dataclass_to_dict(profile.preferences),
                     'installed_tools': profile.installed_tools,
                     'skipped_portals': profile.skipped_portals,
                     'last_used': profile.last_used.isoformat() if profile.last_used else None
@@ -1153,7 +1190,7 @@ class AgentMemory:
                 profile_id: {
                     'name': profile.name,
                     'created_at': profile.created_at.isoformat(),
-                    'preferences': asdict(profile.preferences),
+                    'preferences': dataclass_to_dict(profile.preferences),
                     'installed_tools': profile.installed_tools,
                     'skipped_portals': profile.skipped_portals,
                     'last_used': profile.last_used.isoformat() if profile.last_used else None

@@ -97,7 +97,10 @@ class ChatAgent:
     
     def process_message(self, user_input: str) -> ChatResponse:
         """
-        Process user input and return appropriate response.
+        Process user input and return appropriate response using real LLM API calls.
+        
+        This method ensures the chat agent is truly AI-powered by calling the Gemini API
+        instead of using fallback responses.
         
         Args:
             user_input: User's natural language input
@@ -120,23 +123,25 @@ class ChatAgent:
             # Add chat history context
             chat_context = self._get_chat_context()
             
-            # Get LLM response using dedicated chat method
+            # Call the actual LLM API for intelligent responses
+            logger.info(f"Calling LLM API for chat response to: {user_input[:50]}...")
             llm_response = self.llm_client.chat_response(user_input, memory_context, chat_context)
             
             # Show debug info if enabled
             if self.debug_mode:
                 self._show_debug_info(user_input, memory_context, chat_context, llm_response)
             
-            # Add to chat history
-            self._add_to_history(user_input, llm_response)
-            
             # Validate LLM response
             if not llm_response or not isinstance(llm_response, str) or len(llm_response.strip()) < 2:
+                logger.error("Empty or invalid response from LLM API")
                 return ChatResponse(
-                    message="⚠️ Sorry, I didn't understand that. Could you rephrase?",
+                    message="⚠️ I'm having trouble connecting to my AI brain right now. Please check your GEMINI_API_KEY and try again.",
                     action_type="error",
                     confidence=0.4
                 )
+            
+            # Add to chat history
+            self._add_to_history(user_input, llm_response)
             
             # Parse and categorize response
             response = self._parse_chat_response(llm_response, user_input)
@@ -145,13 +150,13 @@ class ChatAgent:
             if response.action_type == "info":
                 response.message = self._enhance_with_memory(response.message, user_input)
             
-            logger.info(f"Chat response: {response.action_type} - {response.message[:50]}...")
+            logger.info(f"Chat response generated via LLM API: {response.action_type} - {response.message[:50]}...")
             return response
             
         except Exception as e:
-            logger.error(f"Error processing chat message: {e}")
+            logger.error(f"Error processing chat message via LLM API: {e}")
             return ChatResponse(
-                message="I'm having trouble processing that. Could you rephrase?",
+                message="I'm having trouble connecting to my AI brain. Please check your GEMINI_API_KEY in the .env file and try again.",
                 action_type="error",
                 confidence=0.5
             )

@@ -81,6 +81,8 @@ Keep responses conversational, helpful, and focused on the user's needs. You're 
             return self._get_fallback_response()
         
         try:
+            logger.info("Calling Gemini API for configuration generation...")
+            
             headers = {
                 "Content-Type": "application/json",
             }
@@ -103,14 +105,38 @@ Keep responses conversational, helpful, and focused on the user's needs. You're 
             if response.status_code == 200:
                 result = response.json()
                 if 'candidates' in result and result['candidates']:
-                    return result['candidates'][0]['content']['parts'][0]['text']
+                    response_text = result['candidates'][0]['content']['parts'][0]['text']
+                    logger.info("Successfully received response from Gemini API")
+                    return response_text
                 else:
                     logger.error("Unexpected response format from Gemini API")
+                    logger.error(f"Response: {result}")
                     return self._get_fallback_response()
+            elif response.status_code == 503:
+                logger.warning("Gemini API is currently overloaded (503 error)")
+                logger.warning("This is a temporary issue with Google's servers, not your API key")
+                logger.warning("Using fallback response for now - try again later for AI-powered recommendations")
+                return self._get_fallback_response()
+            elif response.status_code == 429:
+                logger.warning("Gemini API rate limit exceeded (429 error)")
+                logger.warning("Too many requests - using fallback response")
+                return self._get_fallback_response()
+            elif response.status_code == 401:
+                logger.error("Gemini API authentication failed (401 error)")
+                logger.error("Please check your GEMINI_API_KEY is correct")
+                return self._get_fallback_response()
             else:
                 logger.error(f"Gemini API error: {response.status_code} - {response.text}")
                 return self._get_fallback_response()
                 
+        except requests.exceptions.Timeout:
+            logger.warning("Gemini API request timed out")
+            logger.warning("Using fallback response - try again later")
+            return self._get_fallback_response()
+        except requests.exceptions.ConnectionError:
+            logger.warning("Gemini API connection error")
+            logger.warning("Check your internet connection - using fallback response")
+            return self._get_fallback_response()
         except Exception as e:
             logger.error(f"Error calling Gemini API: {e}")
             return self._get_fallback_response()
@@ -159,10 +185,31 @@ Keep responses conversational, helpful, and focused on the user's needs. You're 
                 else:
                     logger.error("Unexpected response format from Gemini API")
                     return self._get_fallback_chat_response(user_input)
+            elif response.status_code == 503:
+                logger.warning("Gemini API is currently overloaded (503 error)")
+                logger.warning("This is a temporary issue with Google's servers, not your API key")
+                logger.warning("Using fallback response for now - try again later for AI-powered chat")
+                return self._get_fallback_chat_response(user_input)
+            elif response.status_code == 429:
+                logger.warning("Gemini API rate limit exceeded (429 error)")
+                logger.warning("Too many requests - using fallback response")
+                return self._get_fallback_chat_response(user_input)
+            elif response.status_code == 401:
+                logger.error("Gemini API authentication failed (401 error)")
+                logger.error("Please check your GEMINI_API_KEY is correct")
+                return self._get_fallback_chat_response(user_input)
             else:
                 logger.error(f"Gemini API error: {response.status_code} - {response.text}")
                 return self._get_fallback_chat_response(user_input)
                 
+        except requests.exceptions.Timeout:
+            logger.warning("Gemini API request timed out")
+            logger.warning("Using fallback response - try again later")
+            return self._get_fallback_chat_response(user_input)
+        except requests.exceptions.ConnectionError:
+            logger.warning("Gemini API connection error")
+            logger.warning("Check your internet connection - using fallback response")
+            return self._get_fallback_chat_response(user_input)
         except Exception as e:
             logger.error(f"Error calling Gemini API for chat: {e}")
             return self._get_fallback_chat_response(user_input)

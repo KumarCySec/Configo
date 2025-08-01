@@ -1,11 +1,38 @@
-# Python 3.10+
-requests>=2.31.0
-pyyaml>=6.0
-python-dotenv>=1.0.0
-google-generativeai>=0.3.0
-rich
-pyfiglet
-prompt_toolkit
-textual
-mem0ai>=0.1.0
-distro>=1.8.0 
+# CONFIGO - Autonomous AI Setup Agent Dependencies
+# ================================================
+# This file contains all required Python packages for CONFIGO to function properly.
+# Each package is listed with its specific purpose in the CONFIGO ecosystem.
+
+# Core HTTP and API dependencies
+requests>=2.31.0                    # HTTP requests for Gemini API calls
+python-dotenv>=1.0.0                # Environment variable management
+
+# Configuration and data parsing
+pyyaml>=6.0                         # YAML parsing for LLM responses and configs
+
+# LLM and AI dependencies
+google-generativeai>=0.3.0          # Google Gemini API client
+mem0ai>=0.1.0                       # Intelligent memory storage (optional)
+
+# UI and terminal dependencies
+rich>=13.0.0                        # Rich terminal output and progress bars
+pyfiglet>=1.0.0                     # ASCII art banners and text formatting
+prompt_toolkit>=3.0.0               # Interactive command line interface
+textual>=0.40.0                     # Modern terminal UI framework
+
+# System and platform dependencies
+distro>=1.8.0                       # Linux distribution detection
+psutil>=5.9.0                       # System information and process management
+py-cpuinfo>=9.0.0                   # Detailed CPU information detection
+GPUtil>=1.4.0                        # GPU detection and monitoring
+
+# Development and testing dependencies
+pytest>=7.0.0                       # Unit testing framework
+pytest-cov>=4.0.0                   # Test coverage reporting
+
+# Knowledge Layer Dependencies
+chromadb>=0.4.0                     # Vector database for semantic search
+sentence-transformers>=2.2.0        # Text embeddings for semantic similarity
+faiss-cpu>=1.7.4                   # FAISS vector similarity search (CPU version)
+neo4j>=5.0.0                       # Neo4j graph database driver
+numpy>=1.24.0                      # Numerical computing for embeddings 

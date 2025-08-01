@@ -1,34 +1,69 @@
+"""
+File: core/ai.py
+Purpose: Handles the core LLM logic for stack recommendations and reasoning.
+Maintainer: Kishore Kumar S
+Description: Provides AI-powered tool recommendations, chat functionality, and YAML parsing
+             for the CONFIGO development environment setup agent.
+"""
+
 import yaml
 import logging
 import os
+import time
 import requests
-from typing import List, Dict, Any, Tuple
+import re
+from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass
 from dotenv import load_dotenv
+import sys
 
 # Load environment variables from .env file
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+# Log API key status for debugging
+api_key = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
+if api_key and api_key != "your_gemini_api_key_here":
+    logger.info(f"API key found: {api_key[:10]}...")
+else:
+    logger.warning("No valid API key found in .env file - LLM features will be limited")
+    logger.warning("Please set GEMINI_API_KEY in your .env file to enable AI features")
+
+
 @dataclass
 class Tool:
-    """Tool configuration."""
+    """
+    Tool configuration dataclass.
+    
+    Represents a development tool with installation and validation commands.
+    """
     name: str
     install_command: str
     check_command: str
     is_extension: bool = False
     extension_id: str = ""
 
+
 @dataclass
 class LoginPortal:
-    """Login portal configuration."""
+    """
+    Login portal configuration dataclass.
+    
+    Represents a web portal that users need to log into for development services.
+    """
     name: str
     url: str
     description: str = ""
 
+
 class LLMClient:
-    """Simple LLM client for Gemini API integration."""
+    """
+    Enhanced LLM client for Gemini API integration with proper validation.
+    
+    This class handles all communication with Google's Gemini API, including
+    error handling, fallback responses, and proper authentication.
+    """
     
     # System prompts for different modes
     CHAT_AGENT_PROMPT = """
@@ -62,25 +97,59 @@ Keep responses conversational, helpful, and focused on the user's needs. You're 
 """
     
     def __init__(self):
+        """
+        Initialize the LLM client with API configuration.
+        
+        Sets up API key, URL, model, and timeout settings.
+        Validates the API key and logs initialization status.
+        """
         # Try GEMINI_API_KEY first, then fallback to GOOGLE_API_KEY
         self.api_key = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
         self.api_url = os.getenv('GEMINI_API_URL', "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent")
         self.model = os.getenv('GEMINI_MODEL', "gemini-2.0-flash-exp")
         self.timeout = int(os.getenv('LLM_TIMEOUT', 30))
         
-        if not self.api_key:
-            logger.warning("GEMINI_API_KEY not found - LLM features will be limited")
-        else:
+        # Validate API key
+        self._validate_api_key()
+        
+        if self.api_key and self.api_key != "your_gemini_api_key_here":
             logger.info(f"LLMClient initialized with model: {self.model}")
             logger.info(f"API key found: {self.api_key[:10]}...")
+        else:
+            logger.error("No valid API key found - LLM features will be limited")
+            logger.error("Please set GEMINI_API_KEY in your .env file")
+    
+    def _validate_api_key(self) -> bool:
+        """
+        Validate that we have a proper API key.
+        
+        Returns:
+            bool: True if API key is valid, False otherwise
+        """
+        if not self.api_key or self.api_key == "your_gemini_api_key_here":
+            logger.error("Invalid or missing GEMINI_API_KEY")
+            logger.error("Please get your API key from: https://makersuite.google.com/app/apikey")
+            logger.error("Then add it to your .env file as: GEMINI_API_KEY=your_actual_key")
+            return False
+        return True
     
     def generate_config(self, prompt: str) -> str:
-        """Generate configuration using Gemini API."""
-        if not self.api_key:
-            logger.warning("No API key available - returning fallback response")
+        """
+        Generate configuration using Gemini API.
+        
+        Args:
+            prompt: The prompt to send to the Gemini API
+            
+        Returns:
+            str: Generated configuration or fallback response
+        """
+        if not self._validate_api_key():
+            logger.error("Cannot generate config without valid API key")
             return self._get_fallback_response()
         
         try:
+            logger.info("Calling Gemini API for configuration generation...")
+            
             headers = {
                 "Content-Type": "application/json",
             }
@@ -103,25 +172,61 @@ Keep responses conversational, helpful, and focused on the user's needs. You're 
             if response.status_code == 200:
                 result = response.json()
                 if 'candidates' in result and result['candidates']:
-                    return result['candidates'][0]['content']['parts'][0]['text']
+                    response_text = result['candidates'][0]['content']['parts'][0]['text']
+                    logger.info("Successfully received response from Gemini API")
+                    return response_text
                 else:
                     logger.error("Unexpected response format from Gemini API")
+                    logger.error(f"Response: {result}")
                     return self._get_fallback_response()
+            elif response.status_code == 503:
+                logger.warning("Gemini API is currently overloaded (503 error)")
+                logger.warning("This is a temporary issue with Google's servers, not your API key")
+                logger.warning("Using fallback response for now - try again later for AI-powered recommendations")
+                return self._get_fallback_response()
+            elif response.status_code == 429:
+                logger.warning("Gemini API rate limit exceeded (429 error)")
+                logger.warning("Too many requests - using fallback response")
+                return self._get_fallback_response()
+            elif response.status_code == 401:
+                logger.error("Gemini API authentication failed (401 error)")
+                logger.error("Please check your GEMINI_API_KEY is correct")
+                return self._get_fallback_response()
             else:
                 logger.error(f"Gemini API error: {response.status_code} - {response.text}")
                 return self._get_fallback_response()
                 
+        except requests.exceptions.Timeout:
+            logger.warning("Gemini API request timed out")
+            logger.warning("Using fallback response - try again later")
+            return self._get_fallback_response()
+        except requests.exceptions.ConnectionError:
+            logger.warning("Gemini API connection error")
+            logger.warning("Check your internet connection - using fallback response")
+            return self._get_fallback_response()
         except Exception as e:
             logger.error(f"Error calling Gemini API: {e}")
             return self._get_fallback_response()
     
     def chat_response(self, user_input: str, memory_context: str = "", chat_context: str = "") -> str:
-        """Generate a chat response using the chat system prompt."""
-        if not self.api_key:
-            logger.warning("No API key available - returning fallback chat response")
+        """
+        Generate a chat response using the chat system prompt.
+        
+        Args:
+            user_input: The user's input message
+            memory_context: Optional memory context to include
+            chat_context: Optional chat history context
+            
+        Returns:
+            str: Generated chat response or fallback response
+        """
+        if not self._validate_api_key():
+            logger.error("Cannot generate chat response without valid API key")
             return self._get_fallback_chat_response(user_input)
         
         try:
+            logger.info("Calling Gemini API for chat response...")
+            
             # Create the full prompt with system prompt and context
             full_prompt = f"{self.CHAT_AGENT_PROMPT}\n\n"
             
@@ -155,20 +260,52 @@ Keep responses conversational, helpful, and focused on the user's needs. You're 
             if response.status_code == 200:
                 result = response.json()
                 if 'candidates' in result and result['candidates']:
-                    return result['candidates'][0]['content']['parts'][0]['text'].strip()
+                    response_text = result['candidates'][0]['content']['parts'][0]['text'].strip()
+                    logger.info("Successfully received chat response from Gemini API")
+                    return response_text
                 else:
                     logger.error("Unexpected response format from Gemini API")
+                    logger.error(f"Response: {result}")
                     return self._get_fallback_chat_response(user_input)
+            elif response.status_code == 503:
+                logger.warning("Gemini API is currently overloaded (503 error)")
+                logger.warning("This is a temporary issue with Google's servers, not your API key")
+                logger.warning("Using fallback response for now - try again later for AI-powered chat")
+                return self._get_fallback_chat_response(user_input)
+            elif response.status_code == 429:
+                logger.warning("Gemini API rate limit exceeded (429 error)")
+                logger.warning("Too many requests - using fallback response")
+                return self._get_fallback_chat_response(user_input)
+            elif response.status_code == 401:
+                logger.error("Gemini API authentication failed (401 error)")
+                logger.error("Please check your GEMINI_API_KEY is correct")
+                return self._get_fallback_chat_response(user_input)
             else:
                 logger.error(f"Gemini API error: {response.status_code} - {response.text}")
                 return self._get_fallback_chat_response(user_input)
                 
+        except requests.exceptions.Timeout:
+            logger.warning("Gemini API request timed out")
+            logger.warning("Using fallback response - try again later")
+            return self._get_fallback_chat_response(user_input)
+        except requests.exceptions.ConnectionError:
+            logger.warning("Gemini API connection error")
+            logger.warning("Check your internet connection - using fallback response")
+            return self._get_fallback_chat_response(user_input)
         except Exception as e:
             logger.error(f"Error calling Gemini API for chat: {e}")
             return self._get_fallback_chat_response(user_input)
     
     def _get_fallback_chat_response(self, user_input: str) -> str:
-        """Return a fallback chat response with dynamic, conversational replies."""
+        """
+        Return a fallback chat response with dynamic, conversational replies.
+        
+        Args:
+            user_input: The user's input message
+            
+        Returns:
+            str: A conversational fallback response
+        """
         user_input_lower = user_input.lower()
         
         # Handle common identity questions with personality
@@ -209,7 +346,12 @@ Keep responses conversational, helpful, and focused on the user's needs. You're 
             return "I'm CONFIGO, your intelligent development assistant! 🚀 I can help with tool installation, environment setup, error troubleshooting, tech stack recommendations, and much more. What would you like to work on today?"
     
     def _get_fallback_response(self) -> str:
-        """Return a fallback YAML configuration."""
+        """
+        Return a fallback YAML configuration.
+        
+        Returns:
+            str: A basic YAML configuration for common development tools
+        """
         return """
 base_tools:
   - name: "Git"
@@ -235,46 +377,52 @@ login_portals:
     description: "Version control and collaboration"
 """
 
-logger = logging.getLogger(__name__)
 
-def suggest_stack(env: str, stack_info: str | None = None, message_display=None) -> tuple[List[Dict[str, str]], List[Any]]:
+def suggest_stack(env: str, stack_info: Optional[str] = None, message_display=None, debug: bool = False, ui=None) -> Tuple[List[Dict[str, str]], List[Any]]:
     """
-    Generate a tech stack suggestion using LLM based on environment description.
+    Generate a tech stack suggestion using enhanced LLM agent based on environment description.
     
     Args:
         env: Environment description from user input
         stack_info: Optional project scan information
         message_display: Optional MessageDisplay instance for user-friendly output
+        debug: Enable debug mode for detailed logging
+        ui: Optional UI instance for progress display
         
     Returns:
-        List[Dict[str, str]]: List of tools with their status and detection commands
+        Tuple[List[Dict[str, str]], List[Any]]: List of tools and login portals
     """
     try:
-        # Initialize LLM client
-        llm_client = LLMClient()
+        # Initialize memory and enhanced LLM agent
+        from core.memory import AgentMemory
+        from core.enhanced_llm_agent import EnhancedLLMAgent
         
-        # Create enhanced prompt with stack info if available
-        if stack_info:
-            enhanced_env = f"{env}\n\nDetected project stack: {stack_info}"
-        else:
-            enhanced_env = env
-            
+        memory = AgentMemory()
+        llm_agent = EnhancedLLMAgent(memory)
+        
         # Log to file only, not console
-        logger.info(f"Querying Gemini for tech stack: {env}")
+        logger.info(f"Querying enhanced LLM agent for tech stack: {env}")
         
         # Show user-friendly message if message_display is provided
         if message_display:
             message_display.show_ai_query_start(env)
         
-        # Generate YAML config from LLM
-        yaml_config = llm_client.generate_config(enhanced_env)
+        # Show enhanced UI for LLM API call if available
+        if ui:
+            from rich.live import Live
+            progress = ui.show_llm_api_call("Generating AI-powered stack recommendations...")
+            with Live(progress, console=ui.console, refresh_per_second=10):
+                # Simulate progress for better UX
+                for i in range(100):
+                    progress.update(0, completed=i)
+                    time.sleep(0.02)  # Quick animation
         
-        # Parse YAML config
-        tools, login_portals = parse_llm_config(yaml_config, env)
+        # Generate enhanced stack using the enhanced LLM agent
+        llm_response = llm_agent.generate_enhanced_stack(env, str(stack_info) if stack_info else "", debug=debug)
         
-        # Convert to the format expected by the UI
+        # Convert enhanced response to the format expected by the UI
         tool_list = []
-        for tool in tools:
+        for tool in llm_response.tools:
             tool_dict = {
                 'name': tool.name,
                 'status': '⬇️ To be installed',
@@ -282,24 +430,42 @@ def suggest_stack(env: str, stack_info: str | None = None, message_display=None)
             }
             tool_list.append(tool_dict)
         
+        # Convert login portals to the expected format
+        login_portals = []
+        for portal in llm_response.login_portals:
+            login_portals.append({
+                'name': portal['name'],
+                'url': portal['url'],
+                'description': portal['description']
+            })
+        
         # Log to file only
-        logger.info(f"Stack received: {len(tools)} components")
+        logger.info(f"Enhanced stack received: {len(llm_response.tools)} components")
+        logger.info(f"Confidence score: {llm_response.confidence_score}")
+        logger.info(f"Domain completion: {llm_response.domain_completion}")
         
         # Show user-friendly success message
         if message_display:
-            message_display.show_ai_query_success(len(tools), len(login_portals))
+            message_display.show_ai_query_success(len(llm_response.tools), len(login_portals))
+        
+        # Warn if <3 tools or only base tools
+        tool_names = [t['name'].lower() for t in tool_list]
+        base_tools = set(["python", "python 3", "git"])
+        only_base = set(tool_names).issubset(base_tools)
+        if len(tool_list) < 3 or only_base:
+            print("\n⚠️  Warning: Incomplete stack generated. Using fallback knowledge.\n")
         
         return tool_list, login_portals
         
     except Exception as e:
-        logger.error(f"Failed to generate stack with LLM: {e}")
+        logger.error(f"Failed to generate enhanced stack: {e}")
         
         # Show user-friendly fallback message
         if message_display:
             message_display.show_ai_query_fallback()
         
         # Fallback to domain-specific tools based on environment
-        logger.info("Using fallback tools due to LLM error")
+        logger.info("Using fallback tools due to enhanced LLM error")
         tools, login_portals = add_missing_recommendations([], [], env)
         
         # Convert to the format expected by the UI
@@ -313,6 +479,7 @@ def suggest_stack(env: str, stack_info: str | None = None, message_display=None)
             tool_list.append(tool_dict)
         
         return tool_list, login_portals
+
 
 def parse_llm_config(yaml_config: str, environment: str = "") -> Tuple[List[Tool], List[LoginPortal]]:
     """
@@ -450,7 +617,6 @@ def parse_llm_config(yaml_config: str, environment: str = "") -> Tuple[List[Tool
         # Try to extract valid YAML from the response
         try:
             # Look for YAML content between ```yaml and ``` markers
-            import re
             yaml_match = re.search(r'```yaml\s*(.*?)\s*```', yaml_config, re.DOTALL)
             if yaml_match:
                 cleaned_yaml = yaml_match.group(1)
@@ -627,4 +793,14 @@ def add_missing_recommendations(tools: List[Tool], login_portals: List[LoginPort
                     description=portal_desc
                 ))
     
-    return tools, login_portals 
+    return tools, login_portals
+
+
+# CLI entry point (add --debug flag support)
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="CONFIGO AI Stack Suggestion")
+    parser.add_argument("env", type=str, help="Environment description")
+    parser.add_argument("--debug", action="store_true", help="Print Gemini prompt and response")
+    args = parser.parse_args()
+    suggest_stack(args.env, debug=args.debug) 

@@ -37,10 +37,15 @@ Usage:
 import logging
 import os
 import sys
+import time
 import webbrowser
 import subprocess
 from datetime import datetime
 from typing import List, Dict, Any, Optional
+
+# Load environment variables first
+from dotenv import load_dotenv
+load_dotenv()
 
 # Core agent components
 from core.memory import AgentMemory
@@ -51,12 +56,15 @@ from core.project_scan import scan_project
 from core.chat_agent import ChatAgent
 from core.project_scanner import ProjectScanner
 from core.portal_orchestrator import PortalOrchestrator
+from core.system_inspector import SystemInspector, display_system_summary
 
 # UI components
 from ui.layout import ConfigoLayout
 from ui.enhanced_messages import EnhancedMessageDisplay
 from ui.modern_ui import ModernUI
+from ui.enhanced_terminal_ui import EnhancedTerminalUI, UIConfig
 from rich.console import Console
+from rich.live import Live
 
 # Installation utilities
 from installers.base import install_tools
@@ -260,7 +268,7 @@ def get_tool_version(tool_name: str, check_command: str) -> Optional[str]:
         return None
 
 
-def main() -> None:
+def main(debug: bool = False, lite_mode: bool = False) -> None:
     """
     Main entry point for the autonomous AI setup agent.
     
@@ -277,20 +285,41 @@ def main() -> None:
     setup_logging()
     logger = logging.getLogger(__name__)
     
-    # Initialize UI components
+    # Initialize enhanced UI components
+    ui_config = UIConfig()
+    if lite_mode:
+        ui_config.use_animations = False
+        ui_config.use_emoji = False
+    
+    ui = EnhancedTerminalUI(ui_config)
     console = Console()
     messages = EnhancedMessageDisplay(console)
     
     try:
-        # Show autonomous agent banner
-        messages.show_autonomous_banner()
+        # Show enhanced banner
+        ui.show_banner()
+        
+        if lite_mode:
+            ui.show_lite_mode_notice()
         
         # Initialize memory system for persistent state
         logger.info("Initializing memory system")
         memory = AgentMemory()
         
+        # Perform advanced system intelligence analysis
+        logger.info("Performing system intelligence analysis")
+        system_inspector = SystemInspector()
+        system_info = system_inspector.analyze()
+        
+        # Display system intelligence summary
+        display_system_summary(system_info)
+        
+        # Save system intelligence to memory
+        system_inspector.save_to_memory(system_info)
+        
         # Display memory context and statistics
-        messages.show_memory_context(memory)
+        memory_stats = memory.get_memory_stats()
+        ui.show_memory_context(memory_stats)
         
         # Get user environment requirements
         env = messages.show_environment_prompt()
@@ -310,9 +339,22 @@ def main() -> None:
         logger.info("Initializing enhanced LLM agent")
         llm_agent = EnhancedLLMAgent(memory)
         
-        # Generate AI-powered stack recommendations
-        logger.info("Generating enhanced stack recommendations")
-        llm_response = llm_agent.generate_enhanced_stack(env, str(stack_info) if stack_info else "")
+        # Generate AI-powered stack recommendations with system intelligence
+        logger.info("Generating enhanced stack recommendations with system intelligence")
+        
+        # Create system context for LLM
+        system_context = f"""
+System Environment:
+- OS: {system_info.os_name} {system_info.os_version}
+- Architecture: {system_info.arch}
+- Package Managers: {', '.join(system_info.package_managers)}
+- GPU: {system_info.gpu or 'None'}
+- RAM: {system_info.ram_gb} GB
+- Virtualization: {system_info.virtualization}
+- Sudo Access: {'Yes' if system_info.has_sudo else 'No'}
+"""
+        
+        llm_response = llm_agent.generate_enhanced_stack(env, str(stack_info) if stack_info else "", debug=debug)
         
         # Convert LLM response to tool list format
         tools = []
@@ -334,7 +376,11 @@ def main() -> None:
         
         # Show domain detection results
         detected_domain = llm_response.domain_completion.get("detected_domain", "unknown")
-        messages.show_domain_detection(detected_domain, llm_response.confidence_score)
+        ui.show_ai_reasoning(
+            f"Domain Detection: {detected_domain.title()}",
+            f"Based on project analysis and AI reasoning, CONFIGO detected this as a {detected_domain} project.",
+            llm_response.confidence_score
+        )
         
         # Generate intelligent installation plan
         logger.info("Generating installation plan")
@@ -343,14 +389,31 @@ def main() -> None:
         plan = plan_generator.generate_plan(tools, env, memory_context)
         
         # Display the plan to user
-        messages.show_planning_steps(plan)
+        plan_steps = []
+        for step in plan.steps:
+            step_dict = {
+                'name': step.name,
+                'description': step.description,
+                'sub_steps': [step.step_type.value] if step.step_type else []
+            }
+            plan_steps.append(step_dict)
+        ui.show_planning_steps(plan_steps)
         
         # Show login portals that will be opened
-        messages.show_login_portals(llm_response.login_portals)
+        if llm_response.login_portals:
+            ui.show_info_message(
+                f"Will open {len(llm_response.login_portals)} login portal(s) during installation",
+                "🌐"
+            )
         
         # Display improvement suggestions
         if llm_response.improvement_suggestions:
-            messages.show_improvement_suggestions(llm_response.improvement_suggestions)
+            suggestions_text = "\n".join([f"• {suggestion}" for suggestion in llm_response.improvement_suggestions])
+            ui.show_ai_reasoning(
+                "Improvement Suggestions",
+                suggestions_text,
+                0.9
+            )
         
         # Get user confirmation before proceeding
         if not messages.show_installation_prompt():
@@ -364,7 +427,7 @@ def main() -> None:
         
         # Execute the installation plan
         logger.info("Starting plan execution")
-        messages.show_installation_start()
+        ui.show_info_message("Starting installation process...", "🚀")
         
         installed_tools = []
         failed_tools = []
@@ -383,7 +446,9 @@ def main() -> None:
             # Start executing the step
             executor.start_step(step)
             current_step = executor.plan.completed_steps + executor.plan.failed_steps + 1
-            messages.show_step_progress(step, current_step, plan.total_steps)
+            
+            # Show progress with enhanced UI
+            ui.show_info_message(f"Installing {step.name}...", "🔧")
             
             try:
                 # Execute based on step type
@@ -403,16 +468,16 @@ def main() -> None:
                     version = get_tool_version(step.name, step.check_command)
                     executor.complete_step(step, version)
                     installed_tools.append(step.name)
-                    messages.show_step_result(step, True, version)
+                    ui.show_success_message(f"{step.name} installed successfully", f"Version: {version}" if version else None)
                 else:
                     # Mark as failed and attempt self-healing
                     executor.fail_step(step, "Installation failed")
                     failed_tools.append(step.name)
-                    messages.show_step_result(step, False)
+                    ui.show_error_message(f"Failed to install {step.name}", "Will attempt self-healing")
                     
                     # Attempt self-healing if retries are allowed
                     if memory.should_retry_tool(step.name):
-                        messages.show_retry_attempt(step.name, step.retry_count + 1, step.max_retries)
+                        ui.show_info_message(f"Retrying {step.name} (attempt {step.retry_count + 1}/{step.max_retries})", "🔄")
                         if executor.retry_step(step):
                             continue
                 
@@ -429,19 +494,31 @@ def main() -> None:
         # Perform post-installation validation
         logger.info("Performing post-installation validation")
         validation_report = validator.validate_tools(tools)
-        messages.show_validation_results(validation_report)
+        
+        # Convert validation results to UI format
+        validation_results = []
+        for result in validation_report.validation_results:
+            result_dict = {
+                'name': result.tool_name,
+                'valid': result.is_installed,
+                'version': result.version if hasattr(result, 'version') else 'N/A',
+                'details': result.error_message if hasattr(result, 'error_message') else ''
+            }
+            validation_results.append(result_dict)
+        
+        ui.show_validation_results(validation_results)
         
         # Attempt self-healing for failed tools
         healing_results = []
         if failed_tools:
             logger.info("Attempting self-healing for failed tools")
-            messages.show_self_healing_progress([result for result in validation_report.validation_results if not result.is_installed])
+            ui.show_info_message(f"Attempting to fix {len(failed_tools)} failed installation(s)...", "🔧")
             
             # Use LLM agent to generate fixes
             for failed_tool in failed_tools:
                 fix_command = llm_agent.generate_command_fix(failed_tool, "Installation failed", failed_tool)
                 if fix_command:
-                    messages.show_healing_attempt(failed_tool, fix_command, "LLM-generated fix")
+                    ui.show_info_message(f"Trying LLM-generated fix for {failed_tool}", "🤖")
                     # Create a temporary step for the fix command
                     temp_step = type('Step', (), {
                         'name': failed_tool,
@@ -454,10 +531,20 @@ def main() -> None:
                         'fix_command': fix_command,
                         'success': success
                     })
-                    messages.show_healing_result(failed_tool, success, fix_command)
+                    if success:
+                        ui.show_success_message(f"Fixed {failed_tool} with LLM-generated command")
+                    else:
+                        ui.show_error_message(f"Failed to fix {failed_tool}", "Manual intervention may be required")
         
         # Show final completion summary
-        messages.show_completion_summary(plan, validation_report, healing_results)
+        summary = {
+            'tools_installed': len(installed_tools),
+            'validations_passed': len([r for r in validation_results if r['valid']]),
+            'portals_opened': len(llm_response.login_portals),
+            'total_time': 'N/A',  # Could be calculated if we track start time
+            'suggestions': llm_response.improvement_suggestions if hasattr(llm_response, 'improvement_suggestions') else []
+        }
+        ui.show_completion_summary(summary)
         
         # End the session
         memory.end_session(session_id)
@@ -466,12 +553,12 @@ def main() -> None:
         
     except KeyboardInterrupt:
         logger.info("Setup interrupted by user")
-        messages.show_aborted_message()
+        ui.show_info_message("Setup interrupted by user", "⏹️")
         sys.exit(1)
         
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
-        messages.show_error_with_context(str(e))
+        ui.show_error_message(str(e), "An unexpected error occurred", "Check the logs for more details")
         sys.exit(1)
 
 
@@ -494,16 +581,17 @@ def chat_mode() -> None:
     try:
         # Initialize components
         memory = AgentMemory()
-        chat_agent = ChatAgent(memory, debug_mode=args.debug)
-        ui = ModernUI()
+        chat_agent = ChatAgent(memory, debug_mode=False)
+        ui = EnhancedTerminalUI()
         
         # Show banner
         ui.show_banner()
         
         # Show chat interface
-        ui.show_chat_interface(chat_agent)
+        ui.show_chat_interface("Chat with CONFIGO - Ask me anything about development tools and setup!")
         
-        if args.debug:
+        # Debug mode can be enabled via environment variable
+        if os.getenv('CONFIGO_DEBUG', 'false').lower() == 'true':
             ui.show_info_message("🔍 Debug mode enabled - LLM input/output will be shown")
         
         # Chat loop
@@ -517,7 +605,7 @@ def chat_mode() -> None:
                 
                 # Process message
                 response = chat_agent.process_message(user_input)
-                ui.show_chat_response(response)
+                ui.show_chat_response(response.message if hasattr(response, 'message') else str(response), is_ai=True)
                 
                 # Execute command if needed
                 if response.action_type == "command" and response.command:
@@ -562,21 +650,29 @@ def scan_mode() -> None:
         # Initialize components
         memory = AgentMemory()
         project_scanner = ProjectScanner(memory)
-        ui = ModernUI()
+        ui = EnhancedTerminalUI()
         
         # Show banner
         ui.show_banner()
         
         # Scan project
         logger.info("Scanning project...")
+        ui.show_info_message("Scanning project for technologies and frameworks...", "🔍")
         analysis = project_scanner.scan_project(".")
         
         # Show results
-        ui.show_project_analysis(analysis)
+        ui.show_ai_reasoning(
+            f"Project Analysis: {analysis.project_type.title()}",
+            f"Detected frameworks: {', '.join(analysis.detected_frameworks) if analysis.detected_frameworks else 'None'}\n"
+            f"Languages: {', '.join(analysis.languages) if analysis.languages else 'None'}\n"
+            f"Confidence: {analysis.confidence:.1%}",
+            analysis.confidence
+        )
         
         # Show recommendations
         if analysis.recommendations:
-            ui.show_success_message(f"Found {len(analysis.recommendations)} recommendations for your project!")
+            recommendations_text = "\n".join([f"• {rec}" for rec in analysis.recommendations])
+            ui.show_ai_reasoning("Recommendations", recommendations_text, 0.9)
         
     except Exception as e:
         logger.error(f"Scan mode failed: {e}")
@@ -746,6 +842,16 @@ def app_install_mode() -> None:
 if __name__ == "__main__":
     import sys
     
+    # Check for flags first
+    debug = "--debug" in sys.argv
+    lite_mode = "--lite" in sys.argv
+    
+    # Remove flags from argv for mode detection
+    if debug:
+        sys.argv = [arg for arg in sys.argv if arg != "--debug"]
+    if lite_mode:
+        sys.argv = [arg for arg in sys.argv if arg != "--lite"]
+    
     # Check for command line arguments
     if len(sys.argv) > 1:
         mode = sys.argv[1].lower()
@@ -767,9 +873,12 @@ if __name__ == "__main__":
             print("  main.py portal   - Login portal orchestration")
             print("  main.py install  - Natural language app installation")
             print("  main.py help     - Show this help")
+            print("\nOptions:")
+            print("  --debug          - Enable debug logging and LLM response logging")
+            print("  --lite           - Minimal output for low-speed terminals")
         else:
             print(f"Unknown mode: {mode}")
             print("Use 'main.py help' for available modes")
     else:
         # Default mode - full development environment setup
-        main() 
+        main(debug, lite_mode) 

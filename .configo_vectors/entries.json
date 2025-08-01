@@ -1,0 +1,160 @@
+{
+  "8e2fd885efe6f8b2fa8ff605281c622a": {
+    "id": "8e2fd885efe6f8b2fa8ff605281c622a",
+    "content": "Tool: python\nDescription: Python programming language\nCategory: language\nInstall: apt-get install python3",
+    "metadata": {
+      "type": "tool",
+      "tool_name": "python",
+      "category": "language",
+      "install_command": "apt-get install python3"
+    },
+    "embedding": null,
+    "timestamp": "2025-08-02T05:04:43.400517"
+  },
+  "3083e977a2645e063a5c096ea04719dd": {
+    "id": "3083e977a2645e063a5c096ea04719dd",
+    "content": "Tool: pip\nDescription: Python package installer\nCategory: package_manager\nInstall: apt-get install python3-pip",
+    "metadata": {
+      "type": "tool",
+      "tool_name": "pip",
+      "category": "package_manager",
+      "install_command": "apt-get install python3-pip"
+    },
+    "embedding": null,
+    "timestamp": "2025-08-02T05:04:43.401230"
+  },
+  "0079e729f5bd30195e59ff51eb6d0539": {
+    "id": "0079e729f5bd30195e59ff51eb6d0539",
+    "content": "Tool: docker\nDescription: Container platform\nCategory: tool\nInstall: apt-get install docker",
+    "metadata": {
+      "type": "tool",
+      "tool_name": "docker",
+      "category": "tool",
+      "install_command": "apt-get install docker"
+    },
+    "embedding": null,
+    "timestamp": "2025-08-02T05:04:43.411088"
+  },
+  "ffbc696157df19f80bf6bc34aeafe809": {
+    "id": "ffbc696157df19f80bf6bc34aeafe809",
+    "content": "Tool: vscode\nDescription: Visual Studio Code\nCategory: editor\nInstall: snap install code",
+    "metadata": {
+      "type": "tool",
+      "tool_name": "vscode",
+      "category": "editor",
+      "install_command": "snap install code"
+    },
+    "embedding": null,
+    "timestamp": "2025-08-02T05:04:43.411865"
+  },
+  "15d6481cbddade07324f20c37a8f6432": {
+    "id": "15d6481cbddade07324f20c37a8f6432",
+    "content": "Tool: git\nDescription: Version control system\nCategory: tool\nInstall: apt-get install git",
+    "metadata": {
+      "type": "tool",
+      "tool_name": "git",
+      "category": "tool",
+      "install_command": "apt-get install git"
+    },
+    "embedding": null,
+    "timestamp": "2025-08-02T05:04:43.412782"
+  },
+  "a914f7df0461aaebf6d6ebe573719d1f": {
+    "id": "a914f7df0461aaebf6d6ebe573719d1f",
+    "content": "Error: Permission denied\nSolution: Run with sudo",
+    "metadata": {
+      "type": "error",
+      "tool_name": "docker",
+      "os_type": "linux",
+      "architecture": "x86_64",
+      "timestamp": "2025-08-02T05:04:43.414349",
+      "solution": "Run with sudo"
+    },
+    "embedding": null,
+    "timestamp": "2025-08-02T05:04:43.414401"
+  },
+  "6593d9d38b3a1d503a4178009f824e68": {
+    "id": "6593d9d38b3a1d503a4178009f824e68",
+    "content": "Error: Package not found\nSolution: Update package list",
+    "metadata": {
+      "type": "error",
+      "tool_name": "python",
+      "os_type": "linux",
+      "architecture": "x86_64",
+      "timestamp": "2025-08-02T05:04:43.415288",
+      "solution": "Update package list"
+    },
+    "embedding": null,
+    "timestamp": "2025-08-02T05:04:43.415347"
+  },
+  "4b26f70c668c599c4a9623adc2f7b562": {
+    "id": "4b26f70c668c599c4a9623adc2f7b562",
+    "content": "Error: Connection timeout\nSolution: Check internet connection",
+    "metadata": {
+      "type": "error",
+      "tool_name": "pip",
+      "os_type": "linux",
+      "architecture": "x86_64",
+      "timestamp": "2025-08-02T05:04:43.415922",
+      "solution": "Check internet connection"
+    },
+    "embedding": null,
+    "timestamp": "2025-08-02T05:04:43.415956"
+  },
+  "e61f6889a9ab87c8bda735eb670e0c7b": {
+    "id": "e61f6889a9ab87c8bda735eb670e0c7b",
+    "content": "Error: Installation failed\nSolution: Try alternative installation method",
+    "metadata": {
+      "type": "error",
+      "tool_name": "vscode",
+      "os_type": "linux",
+      "architecture": "x86_64",
+      "timestamp": "2025-08-02T05:04:43.416643",
+      "solution": "Try alternative installation method"
+    },
+    "embedding": null,
+    "timestamp": "2025-08-02T05:04:43.416683"
+  },
+  "fcbb91e71d84a8eb27980fa4dda8ab9d": {
+    "id": "fcbb91e71d84a8eb27980fa4dda8ab9d",
+    "content": "User: user1\nPersona: AI developer working with Python and TensorFlow\nPreferences: {\"auto_retry\": true, \"preferred_editor\": \"vscode\"}",
+    "metadata": {
+      "type": "user_persona",
+      "user_id": "user1",
+      "preferences": {
+        "auto_retry": true,
+        "preferred_editor": "vscode"
+      }
+    },
+    "embedding": null,
+    "timestamp": "2025-08-02T05:04:43.417675"
+  },
+  "f099b6e422cf1897055b06e83f703a4a": {
+    "id": "f099b6e422cf1897055b06e83f703a4a",
+    "content": "User: user2\nPersona: Data scientist using Python and Jupyter\nPreferences: {\"auto_retry\": false, \"preferred_editor\": \"jupyter\"}",
+    "metadata": {
+      "type": "user_persona",
+      "user_id": "user2",
+      "preferences": {
+        "auto_retry": false,
+        "preferred_editor": "jupyter"
+      }
+    },
+    "embedding": null,
+    "timestamp": "2025-08-02T05:04:43.418565"
+  },
+  "1043b53768977cb8cebddb6a6cd331af": {
+    "id": "1043b53768977cb8cebddb6a6cd331af",
+    "content": "User: user3\nPersona: DevOps engineer using Docker and Git\nPreferences: {\"auto_retry\": true, \"preferred_editor\": \"vim\"}",
+    "metadata": {
+      "type": "user_persona",
+      "user_id": "user3",
+      "preferences": {
+        "auto_retry": true,
+        "preferred_editor": "vim"
+      }
+    },
+    "embedding": null,
+    "timestamp": "2025-08-02T05:04:43.419044"
+  }
+}

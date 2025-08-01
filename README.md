@@ -1,311 +1,399 @@
-# 🚀 CONFIGO - Autonomous AI Setup Agent
+# CONFIGO - Intelligent Development Environment Agent
 
-> **Intelligent, memory-aware development environment setup with LLM-powered recommendations and self-healing capabilities**
+🚀 **A professional AI-powered CLI tool that intelligently sets up development environments with memory, planning, self-healing, and validation capabilities.**
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![AI-Powered](https://img.shields.io/badge/AI--Powered-Gemini%20LLM-purple.svg)]()
-[![Self-Healing](https://img.shields.io/badge/Self--Healing-Automatic%20Recovery-green.svg)]()
-[![Memory](https://img.shields.io/badge/Memory-mem0%20Enhanced-orange.svg)]()
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)]()
 
-<div align="center">
+## 🌟 Features
 
-**🧠 Intelligent • 🔧 Self-Healing • 💾 Memory-Aware • 🎯 Domain-Specific • 📱 App Installation**
+### 🧠 **AI-Powered Intelligence**
+- **Memory-aware recommendations** using mem0ai
+- **LLM-powered stack generation** via Google Gemini
+- **Domain detection** and project analysis
+- **Self-healing installation** with retry logic
+- **Intelligent error recovery** and command fixes
 
-*The ultimate AI-powered development environment setup agent that understands your needs and learns from your preferences*
+### 🎯 **Core Capabilities**
+- **Full development environment setup** with tool validation
+- **Interactive AI chat assistant** for development questions
+- **Project scanning and analysis** with framework detection
+- **Natural language app installation** ("install vscode")
+- **Login portal orchestration** for development services
+- **System diagnostics and health checks**
 
-</div>
+### 🎨 **Modern Terminal UI**
+- **Rich terminal interface** with colors and animations
+- **Multiple themes** (default, minimal, developer, verbose, dark, light)
+- **Live progress tracking** and real-time updates
+- **Professional polish** with welcome animations
+- **Responsive design** for different terminal sizes
 
----
+### 🔧 **Advanced Features**
+- **Post-installation validation** of all tools
+- **Session tracking** and memory persistence
+- **Extension management** for VS Code/Cursor
+- **Package manager detection** and optimization
+- **Cross-platform compatibility** (Linux, macOS, Windows)
 
-## 🎯 What is CONFIGO?
+### 🧠 **Knowledge Layer** (NEW!)
+- **Graph Database Integration** - Neo4j for tool relationships and dependency modeling
+- **Vector Database** - Chroma/FAISS for semantic search and error matching
+- **Intelligent Error Resolution** - Find similar errors and their solutions
+- **Personalized Recommendations** - Learn from user patterns and success rates
+- **Tool Relationship Modeling** - Track dependencies between tools (Python → pip → packages)
+- **User Persona Similarity** - Find users with similar preferences and needs
+- **Self-Improving Knowledge Base** - Gets smarter with every installation
 
-CONFIGO is an **autonomous AI agent** that intelligently sets up development environments using natural language. It combines the power of Google's Gemini LLM with persistent memory to provide personalized, context-aware tool recommendations and automatic installation.
+## 📦 Installation
 
-### ✨ Key Features
-
-- **🧠 LLM-Powered Intelligence**: Uses Gemini API for intelligent tool recommendations
-- **💾 Persistent Memory**: Remembers your preferences and installation history
-- **🔧 Self-Healing**: Automatically fixes installation failures using AI
-- **🎯 Domain-Aware**: Understands different development domains (AI/ML, Web, DevOps, etc.)
-- **📱 Natural Language App Installation**: Install any app with simple commands like "Install Discord"
-- **🌐 Portal Orchestration**: Automated login portal management
-- **✅ Post-Installation Validation**: Ensures everything works correctly
-- **🎨 Rich Terminal UI**: Beautiful, informative interface
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.8 or higher
-- Google Gemini API key (for LLM features)
-- mem0 API key (optional, for enhanced memory)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/kishore-jarviz/configo.git
-   cd configo
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys
-   ```
-
-4. **Run CONFIGO**
-   ```bash
-   python main.py
-   ```
-
----
-
-## 📱 Natural Language App Installation
-
-**NEW!** CONFIGO now supports natural language app installation across all platforms:
-
+### Quick Start
 ```bash
-# Install any app with simple commands
-python main.py install
+# Clone the repository
+git clone https://github.com/yourusername/configo.git
+cd configo
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Make executable and create symlink
+chmod +x configo.py
+ln -sf $(pwd)/configo.py ~/.local/bin/configo
+
+# Test installation
+configo --help
 ```
 
-### Examples
-
-```
-What app do you want to install? Install Discord
-What app do you want to install? I need Chrome  
-What app do you want to install? Get me Zoom
-What app do you want to install? Install Slack
-```
-
-### How It Works
-
-1. **🎯 Natural Language Understanding**: CONFIGO understands your intent from simple phrases
-2. **🔍 System Detection**: Automatically detects your OS, distro, and available package managers
-3. **🧠 AI-Powered Planning**: Uses Gemini to generate the optimal installation plan
-4. **🔧 Self-Healing Execution**: Runs commands with automatic error recovery
-5. **🎨 GUI Integration**: Creates desktop shortcuts and menu entries
-6. **💾 Memory Persistence**: Remembers successful installations for future sessions
-
-### Supported Platforms
-
-- **Linux**: apt, snap, flatpak, and direct downloads
-- **macOS**: Homebrew and direct downloads  
-- **Windows**: winget, Chocolatey, and direct downloads
-
----
-
-## 🎮 Usage Modes
-
-### 1. Full Development Environment Setup (Default)
+### Environment Setup
 ```bash
-python main.py
-```
-Complete AI-powered development environment setup with tool recommendations, validation, and self-healing.
+# Create .env file with your API keys
+cp .env.example .env
 
-### 2. Natural Language App Installation
+# Edit .env with your Gemini API key
+nano .env
+```
+
+Required environment variables:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+MEM0_API_KEY=your_mem0_api_key_here  # Optional
+LOG_LEVEL=INFO
+
+# Knowledge Layer Configuration (Optional)
+NEO4J_URI=bolt://localhost:7687  # Neo4j database URI
+NEO4J_USERNAME=neo4j             # Neo4j username
+NEO4J_PASSWORD=your_password     # Neo4j password
+CONFIGO_KNOWLEDGE_ENABLED=true   # Enable knowledge layer
+CONFIGO_GRAPH_ENABLED=true       # Enable graph database
+CONFIGO_VECTOR_ENABLED=true      # Enable vector database
+```
+
+## 🚀 Usage
+
+### Interactive Mode (Default)
 ```bash
-python main.py install
+configo
 ```
-Install any application using natural language commands.
+Shows a welcome screen with mode selection:
+1. **Setup** - Full development environment setup
+2. **Chat** - Interactive AI chat assistant
+3. **Scan** - Project analysis and recommendations
+4. **Install** - Natural language app installation
+5. **Portals** - Login portal orchestration
+6. **Diagnostics** - System health check
+7. **Settings** - Configuration and preferences
 
-### 3. Interactive Chat Mode
+### Direct Commands
+
+#### 🛠️ **Development Environment Setup**
 ```bash
-python main.py chat
+configo setup
 ```
-Chat with CONFIGO about your development environment and get personalized recommendations.
+- Analyzes your system and project
+- Generates AI-powered tool recommendations
+- Creates intelligent installation plan
+- Executes installation with validation
+- Provides self-healing for failed installations
 
-### 4. Project Scanning Mode
+#### 🧠 **Knowledge Layer Commands**
 ```bash
-python main.py scan
-```
-Analyze your current project and get tailored tool recommendations.
+# Test the knowledge layer
+python scripts/knowledge_cli.py demo
 
-### 5. Portal Orchestration
+# Add tool to knowledge base
+python scripts/knowledge_cli.py add-tool python language "Python programming language"
+
+# Search for similar errors
+python scripts/knowledge_cli.py search-errors "Permission denied"
+
+# Find related tools
+python scripts/knowledge_cli.py related-tools python
+
+# Show knowledge statistics
+python scripts/knowledge_cli.py stats
+```
+
+#### 💬 **Interactive AI Chat**
 ```bash
-python main.py portal
+configo chat
 ```
-Manage login portals for development services (GitHub, OpenAI, etc.).
+Ask questions about development tools, setup, and get intelligent responses:
+```
+💬 You: How do I set up a React development environment?
+🤖 CONFIGO: I'll help you set up a React development environment...
+```
 
-### 6. Help
+#### 🔍 **Project Analysis**
 ```bash
-python main.py help
+configo scan
 ```
-Show available modes and usage information.
+Scans your current project and provides:
+- Detected frameworks and languages
+- Technology stack analysis
+- Tailored recommendations
+- Confidence scores
 
----
+#### 📦 **Natural Language App Installation**
+```bash
+configo install vscode
+configo install "I need a text editor"
+configo install "install docker for containerization"
+```
+Extracts app names from natural language and installs them intelligently.
 
-## 🧠 How It Works
+#### 🌐 **Login Portal Orchestration**
+```bash
+configo portals
+```
+Opens development service portals:
+- GitHub, GitLab, Bitbucket
+- AWS, Azure, Google Cloud
+- Docker Hub, npm, PyPI
+- And many more...
 
-### 1. **Memory-Aware Recommendations**
-CONFIGO uses persistent memory to remember:
-- Previously installed tools
-- Failed installations and their fixes
-- User preferences and patterns
-- Session history and analytics
+#### 🔧 **System Diagnostics**
+```bash
+configo diagnostics
+```
+Performs comprehensive system health checks:
+- Package manager availability
+- Network connectivity
+- API key validation
+- Tool installation status
 
-### 2. **LLM-Powered Intelligence**
-- **Gemini Integration**: Advanced language model for intelligent recommendations
-- **Domain Detection**: Automatically identifies your development domain
-- **Context Awareness**: Considers your current project and environment
-- **Self-Healing**: Uses AI to fix installation failures
+### Advanced Options
 
-### 3. **Self-Healing Installation**
-- **Automatic Retry**: Retries failed installations with different approaches
-- **LLM-Powered Fixes**: Uses AI to generate alternative installation methods
-- **Progressive Fallbacks**: Tries multiple package managers and sources
-- **Error Analysis**: Intelligent diagnosis of failure causes
+#### Debug Mode
+```bash
+configo setup --debug
+configo chat --debug
+```
+Enables detailed logging and LLM response visibility.
 
-### 4. **Post-Installation Validation**
-- **Tool Verification**: Tests installed tools to ensure functionality
-- **Health Checks**: Comprehensive validation of development environment
-- **Performance Metrics**: Tracks installation success rates and timing
+#### Lite Mode
+```bash
+configo setup --lite
+```
+Minimal output for low-speed terminals or CI/CD environments.
 
----
+#### Theme Selection
+```bash
+configo --theme developer
+configo --theme minimal
+configo --theme dark
+```
 
 ## 🏗️ Architecture
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   User Input    │───▶│  LLM Agent      │───▶│  Installation   │
-│   (Natural      │    │  (Gemini)       │    │  Executor       │
-│    Language)    │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  System         │    │  Memory         │    │  Validation     │
-│  Detection      │    │  (mem0/JSON)    │    │  & Self-Healing │
-│                 │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
 ### Core Components
+```
+configo/
+├── core/                    # Core agent components
+│   ├── memory.py           # Memory management
+│   ├── enhanced_llm_agent.py # LLM integration
+│   ├── planner.py          # Installation planning
+│   ├── validator.py        # Tool validation
+│   ├── project_scanner.py  # Project analysis
+│   └── system_inspector.py # System intelligence
+├── knowledge/              # Knowledge layer (NEW!)
+│   ├── knowledge_engine.py # Central knowledge engine
+│   ├── graph_db_manager.py # Neo4j graph database
+│   ├── vector_store_manager.py # Chroma/FAISS vector database
+│   └── config.py          # Knowledge configuration
+├── ui/                     # User interface
+│   ├── modern_terminal_ui.py # Main UI component
+│   ├── settings_menu.py    # Settings interface
+│   └── enhanced_messages.py # Message display
+├── installers/             # Installation utilities
+├── scripts/                # Utility scripts
+└── configo.py             # Main entry point
+```
 
-- **`core/enhanced_llm_agent.py`**: LLM integration and intelligent recommendations
-- **`core/memory.py`**: Persistent memory system with mem0 integration
-- **`core/shell_executor.py`**: Command execution with error handling
-- **`core/system.py`**: OS and package manager detection
-- **`ui/enhanced_messages.py`**: Rich terminal UI components
+### 🧠 Knowledge Layer Architecture
 
----
+The knowledge layer provides intelligent memory and learning capabilities:
+
+```
+CONFIGO CLI → KnowledgeEngine → GraphDBManager + VectorStoreManager
+     ↓              ↓                    ↓
+Install Event → Log to Both → Store Relationships + Embeddings
+     ↓              ↓                    ↓
+Error Occurs → Search Similar → Find Solutions + Related Tools
+     ↓              ↓                    ↓
+User Query → Combined Query → Graph + Vector Results
+```
+
+**Components:**
+- **GraphDBManager** - Neo4j integration for tool relationships and install events
+- **VectorStoreManager** - Chroma/FAISS for semantic search and error matching
+- **KnowledgeEngine** - Unified API coordinating both databases
+- **Local Simulators** - Fallback when databases aren't available
+
+### Key Features
+
+#### 🧠 **Memory System**
+- Persistent session tracking
+- Tool installation history
+- User preference learning
+- Context-aware recommendations
+
+#### 🤖 **LLM Integration**
+- Google Gemini API for intelligent responses
+- Structured tool recommendations
+- Error analysis and self-healing
+- Natural language processing
+
+#### 🎨 **Enhanced UI**
+- Rich terminal formatting
+- Live progress indicators
+- Animated welcome screens
+- Multiple theme support
 
 ## 🔧 Configuration
 
 ### Environment Variables
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `GEMINI_API_KEY` | Google Gemini API key | Yes |
+| `MEM0_API_KEY` | Mem0 AI API key | No |
+| `LOG_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR) | No |
+| `CONFIGO_DEBUG` | Enable debug mode | No |
 
-Create a `.env` file in the project root:
+#### Knowledge Layer Variables
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NEO4J_URI` | Neo4j database URI | No |
+| `NEO4J_USERNAME` | Neo4j username | No |
+| `NEO4J_PASSWORD` | Neo4j password | No |
+| `CONFIGO_KNOWLEDGE_ENABLED` | Enable knowledge layer | No |
+| `CONFIGO_GRAPH_ENABLED` | Enable graph database | No |
+| `CONFIGO_VECTOR_ENABLED` | Enable vector database | No |
 
-```env
-# Required: Google Gemini API
-GOOGLE_API_KEY=your_gemini_api_key_here
-
-# Optional: mem0 for enhanced memory
-MEM0_API_KEY=your_mem0_api_key_here
-
-# Optional: Logging level
-LOG_LEVEL=INFO
-```
-
-### API Keys
-
-1. **Google Gemini API**: Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. **mem0 API** (optional): Get your API key from [mem0.ai](https://mem0.ai)
-
----
+### Configuration Files
+- `.env` - Environment variables
+- `configo.log` - Application logs
+- `memory.json` - Persistent memory storage
 
 ## 🧪 Testing
 
-Run the test suite to verify all components:
-
+### Quick Test
 ```bash
-python test_app_install.py
+# Test basic functionality
+python configo.py --help
+
+# Test interactive mode
+python configo.py
+
+# Test specific commands
+python configo.py scan
+python configo.py diagnostics
 ```
 
-This will test:
-- System detection
-- LLM plan generation
-- Memory functions
-- UI components
+### Comprehensive Testing
+```bash
+# Run all tests
+python -m pytest tests/
 
----
+# Run with coverage
+python -m pytest tests/ --cov=configo
 
-## 📊 Features
-
-### 🧠 AI Intelligence
-- **Gemini Integration**: Advanced language model for intelligent recommendations
-- **Domain Awareness**: Understands different development domains
-- **Context Awareness**: Considers current project and environment
-- **Self-Healing**: Uses AI to fix installation failures
-
-### 💾 Memory System
-- **Persistent Storage**: Remembers installations and preferences
-- **Semantic Search**: Intelligent memory retrieval
-- **Session Tracking**: Complete setup session history
-- **Learning Capabilities**: Improves recommendations over time
-
-### 🔧 Self-Healing
-- **Automatic Retry**: Retries failed installations
-- **LLM-Powered Fixes**: AI-generated alternative methods
-- **Progressive Fallbacks**: Multiple installation approaches
-- **Error Analysis**: Intelligent failure diagnosis
-
-### 🎨 User Interface
-- **Rich Terminal UI**: Beautiful, informative interface
-- **Progress Tracking**: Real-time installation progress
-- **Status Updates**: Clear status messages and error reporting
-- **Color-Coded Output**: Intuitive color scheme
-
-### 📱 App Installation
-- **Natural Language**: Install apps with simple commands
-- **Cross-Platform**: Works on Linux, macOS, and Windows
-- **GUI Integration**: Creates desktop shortcuts and menu entries
-- **Package Manager Support**: Uses available package managers
-
----
+# Run specific test categories
+python -m pytest tests/test_ui.py
+python -m pytest tests/test_core.py
+```
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
 ### Development Setup
+```bash
+# Clone and setup development environment
+git clone https://github.com/yourusername/configo.git
+cd configo
 
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install development dependencies
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# Run tests
+python -m pytest
+```
+
+### Code Style
+- Follow PEP 8 guidelines
+- Use type hints
+- Add docstrings to all functions
+- Write comprehensive tests
+
+### Pull Request Process
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests
-5. Submit a pull request
-
----
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
-
 ## 🙏 Acknowledgments
 
-- **Google Gemini**: For providing the LLM capabilities
-- **mem0**: For enhanced memory functionality
-- **Rich**: For the beautiful terminal UI
-- **Textual**: For the modern terminal interface
+- **Google Gemini** for AI capabilities
+- **Rich** library for beautiful terminal UI
+- **Mem0 AI** for intelligent memory management
+- **OpenAI** for inspiration in AI agent design
+
+## 📞 Support
+
+- **Documentation**: [Wiki](https://github.com/yourusername/configo/wiki)
+- **Issues**: [GitHub Issues](https://github.com/yourusername/configo/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/configo/discussions)
+- **Email**: support@configo.dev
+
+## 🚀 Roadmap
+
+### Upcoming Features
+- [ ] **Multi-language support** (Python, Node.js, Go, Rust)
+- [ ] **Cloud deployment** integration (AWS, GCP, Azure)
+- [ ] **Team collaboration** features
+- [ ] **Plugin system** for custom tools
+- [ ] **Web dashboard** for monitoring
+- [ ] **Mobile app** companion
+
+### Version History
+- **v1.0.0** - Initial release with core functionality
+- **v1.1.0** - Enhanced UI and memory system
+- **v1.2.0** - Project scanning and analysis
+- **v1.3.0** - Natural language app installation
+- **v2.0.0** - Consolidated architecture and CLI
 
 ---
 
-<div align="center">
+**Made with ❤️ by the CONFIGO Team**
 
-**🚀 Ready to experience the future of development environment setup?**
-
-*Built with 💡 by [Kishore Kumar S](https://github.com/kishore-jarviz)*
-
-</div> 
+*Empowering developers with intelligent automation since 2024* 
