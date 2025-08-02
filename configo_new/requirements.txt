@@ -1,0 +1,35 @@
+# CONFIGO - Autonomous AI Setup Agent
+# ===================================
+# Professional CLI agent for intelligent development environment setup
+
+# Core dependencies
+requests>=2.31.0
+python-dotenv>=1.0.0
+pyyaml>=6.0
+
+# LLM and AI dependencies
+google-generativeai>=0.3.0
+mem0ai>=0.1.0
+
+# UI and terminal dependencies
+rich>=13.0.0
+pyfiglet>=1.0.0
+prompt_toolkit>=3.0.0
+textual>=0.40.0
+
+# System and platform dependencies
+distro>=1.8.0
+psutil>=5.9.0
+py-cpuinfo>=9.0.0
+GPUtil>=1.4.0
+
+# Knowledge Layer Dependencies
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.4
+neo4j>=5.0.0
+numpy>=1.24.0
+
+# Development and testing dependencies
+pytest>=7.0.0
+pytest-cov>=4.0.0 
