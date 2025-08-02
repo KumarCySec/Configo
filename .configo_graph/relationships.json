@@ -1,20 +1,164 @@
 {
-  "python": [
-    "pip",
-    "vscode"
+  "tensorflow_depends_on_numpy": {
+    "type": "HAS_DEPENDENCY",
+    "tool": "tensorflow",
+    "library": "numpy",
+    "version": "1.19.0",
+    "created_at": "2025-08-02T15:49:51.615434"
+  },
+  "tensorflow_depends_on_pandas": {
+    "type": "HAS_DEPENDENCY",
+    "tool": "tensorflow",
+    "library": "pandas",
+    "version": "1.1.0",
+    "created_at": "2025-08-02T15:49:51.615962"
+  },
+  "tensorflow_requires_linux": {
+    "type": "REQUIRES",
+    "tool": "tensorflow",
+    "os": "linux",
+    "version": "18.04+",
+    "created_at": "2025-08-02T15:49:51.616446"
+  },
+  "docker_requires_linux": {
+    "type": "REQUIRES",
+    "tool": "docker",
+    "os": "linux",
+    "version": "18.04+",
+    "created_at": "2025-08-02T15:49:51.616993"
+  },
+  "tensorflow_cuda_error_fixed_by_install_tensorflow": {
+    "type": "FIXED_BY",
+    "error": "tensorflow_cuda_error",
+    "command": "install_tensorflow",
+    "created_at": "2025-08-02T15:49:51.617466"
+  },
+  "docker_permission_error_fixed_by_install_docker": {
+    "type": "FIXED_BY",
+    "error": "docker_permission_error",
+    "command": "install_docker",
+    "created_at": "2025-08-02T15:49:51.617975"
+  },
+  "data_scientist_prefers_tensorflow": {
+    "type": "PREFERS",
+    "persona": "data_scientist",
+    "tool": "tensorflow",
+    "score": 0.9,
+    "created_at": "2025-08-02T15:49:51.618494"
+  },
+  "devops_engineer_prefers_docker": {
+    "type": "PREFERS",
+    "persona": "devops_engineer",
+    "tool": "docker",
+    "score": 0.8,
+    "created_at": "2025-08-02T15:49:51.619017"
+  },
+  "tensorflow_in_category_Machine Learning": {
+    "type": "RELATED_TO",
+    "tool": "tensorflow",
+    "category": "Machine Learning",
+    "created_at": "2025-08-02T15:49:51.619598"
+  },
+  "docker_in_category_Containerization": {
+    "type": "RELATED_TO",
+    "tool": "docker",
+    "category": "Containerization",
+    "created_at": "2025-08-02T15:49:51.620145"
+  },
+  "tensorflow_includes_GPU Support": {
+    "type": "INCLUDES",
+    "tool": "tensorflow",
+    "feature": "GPU Support",
+    "created_at": "2025-08-02T15:49:51.620705"
+  },
+  "docker_includes_Container Management": {
+    "type": "INCLUDES",
+    "tool": "docker",
+    "feature": "Container Management",
+    "created_at": "2025-08-02T15:49:51.621327"
+  },
+  "tensorflow_depends_on_scipy": {
+    "type": "HAS_DEPENDENCY",
+    "tool": "tensorflow",
+    "library": "scipy",
+    "version": null,
+    "created_at": "2025-08-02T15:52:40.385952"
+  },
+  "tensorflow_depends_on_keras": {
+    "type": "HAS_DEPENDENCY",
+    "tool": "tensorflow",
+    "library": "keras",
+    "version": null,
+    "created_at": "2025-08-02T15:52:40.387523"
+  },
+  "tensorflow_includes_Keras Integration": {
+    "type": "INCLUDES",
+    "tool": "tensorflow",
+    "feature": "Keras Integration",
+    "created_at": "2025-08-02T15:52:40.388763"
+  },
+  "tensorflow_includes_AutoML": {
+    "type": "INCLUDES",
+    "tool": "tensorflow",
+    "feature": "AutoML",
+    "created_at": "2025-08-02T15:52:40.389909"
+  },
+  "tensorflow_in_category_Deep Learning": {
+    "type": "RELATED_TO",
+    "tool": "tensorflow",
+    "category": "Deep Learning",
+    "created_at": "2025-08-02T15:52:40.391168"
+  },
+  "tensorflow_in_category_AI/ML": {
+    "type": "RELATED_TO",
+    "tool": "tensorflow",
+    "category": "AI/ML",
+    "created_at": "2025-08-02T15:52:40.392466"
+  },
+  "tensorflow": [
+    "pytorch",
+    "keras",
+    "scikit-learn"
   ],
-  "pip": [
-    "python"
+  "pytorch": [
+    "tensorflow"
   ],
-  "vscode": [
-    "python",
-    "git"
+  "keras": [
+    "tensorflow"
   ],
+  "scikit-learn": [
+    "tensorflow"
+  ],
+  "docker_includes_Image Registry": {
+    "type": "INCLUDES",
+    "tool": "docker",
+    "feature": "Image Registry",
+    "created_at": "2025-08-02T15:52:40.395716"
+  },
+  "docker_includes_Multi-platform": {
+    "type": "INCLUDES",
+    "tool": "docker",
+    "feature": "Multi-platform",
+    "created_at": "2025-08-02T15:52:40.397053"
+  },
+  "docker_in_category_DevOps": {
+    "type": "RELATED_TO",
+    "tool": "docker",
+    "category": "DevOps",
+    "created_at": "2025-08-02T15:52:40.398421"
+  },
   "docker": [
-    "git"
+    "kubernetes",
+    "docker-compose",
+    "podman"
   ],
-  "git": [
-    "docker",
-    "vscode"
+  "kubernetes": [
+    "docker"
+  ],
+  "docker-compose": [
+    "docker"
+  ],
+  "podman": [
+    "docker"
   ]
 }

@@ -1,0 +1,24 @@
+[
+  {
+    "error_id": "tensorflow_cuda_error",
+    "message": "CUDA not found",
+    "solution": "Install CUDA toolkit",
+    "severity": "medium",
+    "tool_name": "tensorflow",
+    "os_type": "linux",
+    "created_at": "2025-08-02T15:49:51.611302",
+    "frequency": 1,
+    "last_occurred": null
+  },
+  {
+    "error_id": "docker_permission_error",
+    "message": "Permission denied",
+    "solution": "Add user to docker group",
+    "severity": "low",
+    "tool_name": "docker",
+    "os_type": "linux",
+    "created_at": "2025-08-02T15:49:51.611585",
+    "frequency": 1,
+    "last_occurred": null
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "task_id": "manual_modern_ai_tools_20250802_155240",
+    "domain": "modern ai tools",
+    "success": false,
+    "start_time": "2025-08-02T15:52:40.383395",
+    "end_time": "2025-08-02T15:52:40.383499",
+    "nodes_added": 0,
+    "relationships_added": 0,
+    "error_message": "Failed to expand knowledge for domain: modern ai tools",
+    "metadata": {
+      "initial_nodes": 14,
+      "final_nodes": 14,
+      "initial_relationships": 12,
+      "final_relationships": 12
+    }
+  }
+]

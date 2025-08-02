@@ -109,22 +109,32 @@ Examples:
     memory_parser.add_argument('action', choices=['show', 'clear', 'stats'], help='Memory action')
     memory_parser.add_argument('--tool', help='Tool name for memory operations')
     
+    # Knowledge commands
+    knowledge_parser = subparsers.add_parser('knowledge', help='Knowledge base operations')
+    knowledge_parser.add_argument('action', choices=['stats', 'backup', 'clear', 'refresh'], help='Knowledge action')
+    knowledge_parser.add_argument('--path', help='Backup path')
+    knowledge_parser.add_argument('--domain', help='Domain for refresh (e.g., "ai stack", "devops essentials")')
+    knowledge_parser.add_argument('--force', action='store_true', help='Force refresh even if domain exists')
+    
+    # Scheduler commands
+    scheduler_parser = subparsers.add_parser('scheduler', help='Knowledge scheduler operations')
+    scheduler_parser.add_argument('action', choices=['start', 'stop', 'status', 'add', 'remove', 'list', 'history'], help='Scheduler action')
+    scheduler_parser.add_argument('--domain', help='Domain for scheduled expansion')
+    scheduler_parser.add_argument('--schedule', choices=['daily', 'weekly', 'monthly'], default='daily', help='Schedule frequency')
+    scheduler_parser.add_argument('--task-id', help='Task ID for removal')
+    
     # Graph commands
     graph_parser = subparsers.add_parser('graph', help='Graph database operations')
-    graph_parser.add_argument('action', choices=['visualize', 'query', 'stats'], help='Graph action')
+    graph_parser.add_argument('action', choices=['visualize', 'query', 'stats', 'expand'], help='Graph action')
     graph_parser.add_argument('--plan', help='Plan name for visualization')
+    graph_parser.add_argument('--domain', help='Domain to expand')
+    graph_parser.add_argument('--limit', type=int, default=10, help='Limit for query results')
     
     # Vector commands
     vector_parser = subparsers.add_parser('vector', help='Vector database operations')
     vector_parser.add_argument('action', choices=['search', 'similar', 'stats'], help='Vector action')
     vector_parser.add_argument('query', help='Search query')
     vector_parser.add_argument('--limit', type=int, default=5, help='Maximum results')
-    
-    # Knowledge commands
-    knowledge_parser = subparsers.add_parser('knowledge', help='Knowledge base operations')
-    knowledge_parser.add_argument('action', choices=['stats', 'backup', 'clear', 'refresh'], help='Knowledge action')
-    knowledge_parser.add_argument('--path', help='Backup path')
-    knowledge_parser.add_argument('--domain', help='Domain for refresh')
     
     # Global options
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
@@ -180,6 +190,8 @@ def main() -> None:
             handle_vector(args, ui, knowledge, config)
         elif args.command == 'knowledge':
             handle_knowledge(args, ui, knowledge, config)
+        elif args.command == 'scheduler':
+            handle_scheduler(args, ui, knowledge, config)
         else:
             # No command specified, show interactive mode
             handle_interactive_mode(ui, agent, installer, validator, planner, config)
@@ -223,23 +235,105 @@ def handle_setup(args: argparse.Namespace, ui: EnhancedTerminalUI, agent: AgentE
 
 def handle_install(args: argparse.Namespace, ui: EnhancedTerminalUI, agent: AgentEngine,
                   installer: Installer, validator: Validator, config: Config) -> None:
-    """Handle install command."""
-    ui.show_mode_header("Tool Installation", f"Installing: {args.tool}")
+    """Handle install commands."""
+    tool_name = args.tool
+    force = args.force
     
-    # Get installation plan for tool
-    plan = agent.plan_tool_installation(args.tool, force=args.force)
+    ui.show_info_message(f"🔧 Installing {tool_name}...")
     
-    # Execute installation
-    result = installer.install_tool(plan, ui)
-    
-    # Validate installation
-    validation = validator.validate_tool(args.tool)
-    
-    if result['success'] and validation['passed']:
-        ui.show_success_message(f"Successfully installed {args.tool}")
-    else:
-        ui.show_error_message(f"Failed to install {args.tool}", 
-                            suggestion=result.get('error', 'Unknown error'))
+    try:
+        # Get system information for logging
+        import platform
+        import os
+        from datetime import datetime
+        
+        os_type = platform.system().lower()
+        architecture = platform.machine()
+        user_id = os.getenv('USER', 'unknown')
+        session_id = f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        
+        # Attempt installation
+        success = installer.install_tool(tool_name, force=force)
+        
+        # Log the install event to knowledge graph
+        knowledge = agent.knowledge_engine
+        if knowledge and hasattr(knowledge, 'log_install_event'):
+            # Get error message if installation failed
+            error_message = None
+            if not success:
+                # Try to get the last error from the installer
+                if hasattr(installer, 'last_error'):
+                    error_message = installer.last_error
+                else:
+                    error_message = f"Installation failed for {tool_name}"
+            
+            # Log the event
+            knowledge.log_install_event(
+                tool_name=tool_name,
+                command=f"configo install {tool_name}",
+                success=success,
+                os_type=os_type,
+                architecture=architecture,
+                error_message=error_message,
+                user_id=user_id,
+                session_id=session_id,
+                retry_count=0
+            )
+            
+            # If successful, update tool statistics
+            if success and hasattr(knowledge, 'graph_db'):
+                # Update tool success rate
+                knowledge.graph_db.log_install_event(
+                    tool_name=tool_name,
+                    command=f"configo install {tool_name}",
+                    success=True,
+                    os_type=os_type,
+                    architecture=architecture,
+                    user_id=user_id,
+                    session_id=session_id
+                )
+        
+        if success:
+            ui.show_success_message(f"✅ {tool_name} installed successfully!")
+            
+            # Validate installation
+            ui.show_info_message("🔍 Validating installation...")
+            validation_result = validator.validate_tool(tool_name)
+            
+            if validation_result.is_valid:
+                ui.show_success_message(f"✅ {tool_name} validation passed!")
+            else:
+                ui.show_warning_message(f"⚠️ {tool_name} installed but validation failed:")
+                for issue in validation_result.issues:
+                    ui.show_warning_message(f"   • {issue}")
+        else:
+            ui.show_error_message(f"❌ Failed to install {tool_name}")
+            
+            # Show helpful suggestions
+            ui.show_info_message("💡 Suggestions:")
+            ui.show_info_message("   • Check your internet connection")
+            ui.show_info_message("   • Try running with --force flag")
+            ui.show_info_message("   • Check if the tool name is correct")
+            
+    except Exception as e:
+        ui.show_error_message(f"❌ Installation error: {e}")
+        
+        # Log the error event
+        try:
+            knowledge = agent.knowledge_engine
+            if knowledge and hasattr(knowledge, 'log_install_event'):
+                knowledge.log_install_event(
+                    tool_name=tool_name,
+                    command=f"configo install {tool_name}",
+                    success=False,
+                    os_type=platform.system().lower(),
+                    architecture=platform.machine(),
+                    error_message=str(e),
+                    user_id=os.getenv('USER', 'unknown'),
+                    session_id=f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                )
+        except Exception as log_error:
+            logger.error(f"Failed to log install error: {log_error}")
 
 
 def handle_chat(args: argparse.Namespace, ui: EnhancedTerminalUI, agent: AgentEngine, config: Config) -> None:
@@ -323,6 +417,17 @@ def handle_graph(args: argparse.Namespace, ui: EnhancedTerminalUI, knowledge: Kn
     elif args.action == 'stats':
         stats = knowledge.get_graph_stats()
         ui.show_info_message(f"Graph statistics: {stats}")
+    elif args.action == 'expand':
+        domain = args.domain or ui.get_user_input("Enter domain to expand (e.g., 'ai stack'): ")
+        if domain:
+            ui.show_info_message(f"Expanding knowledge for domain: {domain}")
+            success = knowledge.expand_graph_from_gemini(domain)
+            if success:
+                ui.show_success_message(f"Successfully expanded knowledge for {domain}")
+            else:
+                ui.show_error_message(f"Failed to expand knowledge for {domain}")
+        else:
+            ui.show_error_message("No domain specified for expansion")
 
 def handle_vector(args: argparse.Namespace, ui: EnhancedTerminalUI, knowledge: KnowledgeEngine, config: Config) -> None:
     """Handle vector commands."""
@@ -349,11 +454,54 @@ def handle_vector(args: argparse.Namespace, ui: EnhancedTerminalUI, knowledge: K
 def handle_knowledge(args: argparse.Namespace, ui: EnhancedTerminalUI, knowledge: KnowledgeEngine, config: Config) -> None:
     """Handle knowledge commands."""
     if args.action == 'stats':
-        graph_stats = knowledge.get_graph_stats()
+        # Get comprehensive statistics
+        graph_stats = knowledge.get_graph_statistics()
         vector_stats = knowledge.get_vector_stats()
-        ui.show_info_message("Knowledge Base Statistics:")
-        ui.show_info_message(f"  Graph: {graph_stats}")
-        ui.show_info_message(f"  Vector: {vector_stats}")
+        
+        ui.show_info_message("🧠 CONFIGO Knowledge Base Statistics")
+        ui.show_info_message("=" * 50)
+        
+        # Graph statistics
+        if graph_stats:
+            ui.show_info_message(f"📊 Graph Database:")
+            ui.show_info_message(f"   🧠 Total Nodes: {graph_stats.get('total_nodes', 0)}")
+            ui.show_info_message(f"   🔗 Total Relationships: {graph_stats.get('total_relationships', 0)}")
+            
+            # Node breakdown
+            node_counts = graph_stats.get('node_counts', {})
+            if node_counts:
+                ui.show_info_message("   📈 Node Breakdown:")
+                for node_type, count in node_counts.items():
+                    ui.show_info_message(f"      • {node_type}: {count}")
+            
+            # Top tools
+            top_tools = graph_stats.get('top_installed_tools', [])
+            if top_tools:
+                ui.show_info_message("   🔧 Top 5 Installed Tools:")
+                for i, tool in enumerate(top_tools[:5], 1):
+                    ui.show_info_message(f"      {i}. {tool.get('name', 'Unknown')} ({tool.get('installs', 0)} installs)")
+            
+            # Common failures
+            common_failures = graph_stats.get('most_common_failures', [])
+            if common_failures:
+                ui.show_info_message("   🛠️ Most Common Failures:")
+                for i, failure in enumerate(common_failures[:5], 1):
+                    ui.show_info_message(f"      {i}. {failure.get('message', 'Unknown')} ({failure.get('tool', 'Unknown')})")
+            
+            # Recent activity
+            recent_activity = graph_stats.get('recent_activity', {})
+            if recent_activity:
+                ui.show_info_message("   📅 Recent Activity (7 days):")
+                ui.show_info_message(f"      • Total Installs: {recent_activity.get('recent_installs', 0)}")
+                ui.show_info_message(f"      • Successful: {recent_activity.get('successful', 0)}")
+                ui.show_info_message(f"      • Failed: {recent_activity.get('failed', 0)}")
+        
+        # Vector statistics
+        if vector_stats:
+            ui.show_info_message(f"🔍 Vector Database:")
+            ui.show_info_message(f"   📚 Total Documents: {vector_stats.get('total_documents', 0)}")
+            ui.show_info_message(f"   🎯 Embedding Model: {vector_stats.get('embedding_model', 'Unknown')}")
+        
     elif args.action == 'backup':
         backup_path = args.path or f"configo_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         success = knowledge.backup_knowledge(backup_path)
@@ -372,16 +520,77 @@ def handle_knowledge(args: argparse.Namespace, ui: EnhancedTerminalUI, knowledge
         else:
             ui.show_info_message("Knowledge base clear cancelled")
     elif args.action == 'refresh':
-        domain = args.domain or ui.get_user_input("Enter domain to refresh (e.g., 'full stack ai'): ")
+        domain = args.domain or ui.get_user_input("Enter domain to refresh (e.g., 'ai stack', 'devops essentials'): ")
         if domain:
-            ui.show_info_message(f"Refreshing knowledge for domain: {domain}")
+            ui.show_info_message(f"🔄 Refreshing knowledge for domain: {domain}")
+            ui.show_info_message("This may take a few moments...")
+            
             success = knowledge.expand_graph_from_gemini(domain)
             if success:
-                ui.show_success_message(f"Successfully refreshed knowledge for {domain}")
+                ui.show_success_message(f"✅ Successfully refreshed knowledge for '{domain}'")
+                
+                # Show updated statistics
+                graph_stats = knowledge.get_graph_statistics()
+                if graph_stats:
+                    ui.show_info_message(f"📊 Updated Statistics:")
+                    ui.show_info_message(f"   🧠 Total Nodes: {graph_stats.get('total_nodes', 0)}")
+                    ui.show_info_message(f"   🔗 Total Relationships: {graph_stats.get('total_relationships', 0)}")
             else:
-                ui.show_error_message(f"Failed to refresh knowledge for {domain}")
+                ui.show_error_message(f"❌ Failed to refresh knowledge for '{domain}'")
+                ui.show_info_message("💡 Try using a different domain or check your internet connection")
         else:
             ui.show_error_message("No domain specified")
+
+
+def handle_scheduler(args: argparse.Namespace, ui: EnhancedTerminalUI, knowledge: KnowledgeEngine, config: Config) -> None:
+    """Handle scheduler commands."""
+    if args.action == 'start':
+        domain = args.domain or ui.get_user_input("Enter domain to schedule expansion (e.g., 'ai stack'): ")
+        if domain:
+            schedule = args.schedule
+            ui.show_info_message(f"🚀 Scheduling daily expansion for domain: {domain}")
+            success = knowledge.schedule_knowledge_expansion(domain, schedule)
+            if success:
+                ui.show_success_message(f"✅ Successfully scheduled daily expansion for '{domain}'")
+            else:
+                ui.show_error_message(f"❌ Failed to schedule daily expansion for '{domain}'")
+        else:
+            ui.show_error_message("No domain specified for scheduling")
+    elif args.action == 'stop':
+        task_id = args.task_id or ui.get_user_input("Enter task ID to stop (e.g., '12345'): ")
+        if task_id:
+            ui.show_info_message(f"🛑 Stopping task with ID: {task_id}")
+            success = knowledge.stop_scheduled_task(task_id)
+            if success:
+                ui.show_success_message(f"✅ Successfully stopped task with ID: {task_id}")
+            else:
+                ui.show_error_message(f"❌ Failed to stop task with ID: {task_id}")
+        else:
+            ui.show_error_message("No task ID specified for stopping")
+    elif args.action == 'status':
+        ui.show_info_message("📊 Current Scheduled Tasks:")
+        tasks = knowledge.get_scheduled_tasks()
+        if tasks:
+            for i, task in enumerate(tasks, 1):
+                ui.show_info_message(f"  {i}. ID: {task.get('id', 'N/A')}, Domain: {task.get('domain', 'N/A')}, Schedule: {task.get('schedule', 'N/A')}, Status: {task.get('status', 'N/A')}")
+        else:
+            ui.show_info_message("No scheduled tasks found.")
+    elif args.action == 'history':
+        ui.show_info_message("📜 Task History:")
+        history = knowledge.get_task_history()
+        if history:
+            for i, task in enumerate(history, 1):
+                ui.show_info_message(f"  {i}. ID: {task.get('id', 'N/A')}, Domain: {task.get('domain', 'N/A')}, Status: {task.get('status', 'N/A')}, Timestamp: {task.get('timestamp', 'N/A')}")
+        else:
+            ui.show_info_message("No task history found.")
+    elif args.action == 'list':
+        ui.show_info_message("🔗 Available Domains for Scheduling:")
+        domains = knowledge.get_available_domains_for_scheduling()
+        if domains:
+            for i, domain in enumerate(domains, 1):
+                ui.show_info_message(f"  {i}. {domain}")
+        else:
+            ui.show_info_message("No domains found for scheduling.")
 
 
 def handle_interactive_mode(ui: EnhancedTerminalUI, agent: AgentEngine, installer: Installer,

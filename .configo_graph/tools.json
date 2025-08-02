@@ -1,62 +1,26 @@
-{
-  "python": {
-    "name": "python",
-    "category": "language",
-    "description": "Python programming language",
-    "install_command": "apt-get install python3",
-    "check_command": "python3 --version",
-    "created_at": "2025-08-02T05:04:43.400057",
-    "last_installed": null,
-    "install_success_rate": 0.0,
-    "total_installs": 0,
+[
+  {
+    "name": "tensorflow",
+    "category": "machine_learning",
+    "description": "Deep learning framework",
+    "install_command": "pip install tensorflow",
+    "check_command": "python -c 'import tensorflow'",
+    "created_at": "2025-08-02T15:49:51.600297",
+    "last_installed": "2025-08-02T15:52:36.372563",
+    "install_success_rate": 1.0,
+    "total_installs": 2,
     "total_failures": 0
   },
-  "pip": {
-    "name": "pip",
-    "category": "package_manager",
-    "description": "Python package installer",
-    "install_command": "apt-get install python3-pip",
-    "check_command": "pip3 --version",
-    "created_at": "2025-08-02T05:04:43.400851",
-    "last_installed": null,
-    "install_success_rate": 0.0,
-    "total_installs": 0,
-    "total_failures": 0
-  },
-  "docker": {
+  {
     "name": "docker",
-    "category": "tool",
+    "category": "containerization",
     "description": "Container platform",
-    "install_command": "apt-get install docker",
+    "install_command": "curl -fsSL https://get.docker.com | sh",
     "check_command": "docker --version",
-    "created_at": "2025-08-02T05:04:43.401443",
-    "last_installed": null,
+    "created_at": "2025-08-02T15:49:51.600814",
+    "last_installed": "2025-08-02T15:52:36.373396",
     "install_success_rate": 0.0,
-    "total_installs": 0,
-    "total_failures": 0
-  },
-  "vscode": {
-    "name": "vscode",
-    "category": "editor",
-    "description": "Visual Studio Code",
-    "install_command": "snap install code",
-    "check_command": "code --version",
-    "created_at": "2025-08-02T05:04:43.411466",
-    "last_installed": null,
-    "install_success_rate": 0.0,
-    "total_installs": 0,
-    "total_failures": 0
-  },
-  "git": {
-    "name": "git",
-    "category": "tool",
-    "description": "Version control system",
-    "install_command": "apt-get install git",
-    "check_command": "git --version",
-    "created_at": "2025-08-02T05:04:43.412203",
-    "last_installed": null,
-    "install_success_rate": 0.0,
-    "total_installs": 0,
-    "total_failures": 0
+    "total_installs": 2,
+    "total_failures": 2
   }
-}
+]

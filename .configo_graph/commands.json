@@ -1,0 +1,22 @@
+[
+  {
+    "command_id": "install_tensorflow",
+    "command": "pip install tensorflow",
+    "description": "Install TensorFlow",
+    "tool_name": "tensorflow",
+    "os_type": "linux",
+    "created_at": "2025-08-02T15:49:51.614141",
+    "success_rate": 0.0,
+    "usage_count": 0
+  },
+  {
+    "command_id": "install_docker",
+    "command": "curl -fsSL https://get.docker.com | sh",
+    "description": "Install Docker",
+    "tool_name": "docker",
+    "os_type": "linux",
+    "created_at": "2025-08-02T15:49:51.614576",
+    "success_rate": 0.0,
+    "usage_count": 0
+  }
+]

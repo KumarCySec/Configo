@@ -1,0 +1,44 @@
+[
+  {
+    "name": "GPU Support",
+    "description": "CUDA acceleration",
+    "tool_name": "tensorflow",
+    "created_at": "2025-08-02T15:49:51.613352",
+    "is_active": true
+  },
+  {
+    "name": "Container Management",
+    "description": "Create and manage containers",
+    "tool_name": "docker",
+    "created_at": "2025-08-02T15:49:51.613712",
+    "is_active": true
+  },
+  {
+    "name": "Keras Integration",
+    "description": "Feature of tensorflow",
+    "tool_name": "tensorflow",
+    "created_at": "2025-08-02T15:52:40.388137",
+    "is_active": true
+  },
+  {
+    "name": "AutoML",
+    "description": "Feature of tensorflow",
+    "tool_name": "tensorflow",
+    "created_at": "2025-08-02T15:52:40.389346",
+    "is_active": true
+  },
+  {
+    "name": "Image Registry",
+    "description": "Feature of docker",
+    "tool_name": "docker",
+    "created_at": "2025-08-02T15:52:40.395070",
+    "is_active": true
+  },
+  {
+    "name": "Multi-platform",
+    "description": "Feature of docker",
+    "tool_name": "docker",
+    "created_at": "2025-08-02T15:52:40.396355",
+    "is_active": true
+  }
+]
