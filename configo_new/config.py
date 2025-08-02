@@ -162,6 +162,11 @@ class Config:
         }
         return key_map.get(service)
     
+    @property
+    def gemini_api_key(self) -> Optional[str]:
+        """Get Gemini API key."""
+        return self.api.gemini_api_key
+    
     def is_feature_enabled(self, feature: str) -> bool:
         """Check if a feature is enabled."""
         feature_map = {

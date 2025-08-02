@@ -1,0 +1,29 @@
+Search for how to fix this error{context}:
+"{error_message}"
+
+Return a JSON response with this structure:
+{
+    "error": "{error_message}",
+    "tool": "{tool_name or 'unknown'}",
+    "root_cause": "What causes this error",
+    "fixes": [
+        {
+            "description": "Fix description",
+            "command": "Command to run",
+            "explanation": "Why this works"
+        }
+    ],
+    "prevention": "How to prevent this error in the future",
+    "related_errors": [
+        "similar_error1",
+        "similar_error2"
+    ]
+}
+
+Focus on:
+- Linux/Ubuntu specific solutions
+- Step-by-step fix commands
+- Root cause analysis
+- Prevention strategies
+- Common patterns and solutions
+- Official documentation references 

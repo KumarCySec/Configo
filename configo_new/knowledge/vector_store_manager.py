@@ -355,6 +355,46 @@ class VectorStoreManager:
             logger.error(f"Error search failed: {e}")
             return []
     
+    def search_similar_errors(self, error_log: str) -> List[Dict[str, Any]]:
+        """
+        Search for similar errors based on error log.
+        
+        Args:
+            error_log: Error log text
+            
+        Returns:
+            List[Dict[str, Any]]: Similar errors
+        """
+        return self.search_error(error_log, 5)
+    
+    def search_similar_tool_requests(self, user_prompt: str) -> List[Dict[str, Any]]:
+        """
+        Search for similar tool requests based on user prompt.
+        
+        Args:
+            user_prompt: User's tool request
+            
+        Returns:
+            List[Dict[str, Any]]: Similar tool requests
+        """
+        try:
+            query = f"tool request: {user_prompt}"
+            results = self.search(query, 5)
+            
+            # Filter for tool-related documents
+            tool_results = []
+            for result in results:
+                metadata = result.get('metadata', {})
+                if (metadata.get('type') == 'tool' or 
+                    'tool' in result['content'].lower() or
+                    'install' in result['content'].lower()):
+                    tool_results.append(result)
+            
+            return tool_results
+        except Exception as e:
+            logger.error(f"Tool request search failed: {e}")
+            return []
+    
     def add_error_knowledge(self, error_message: str, solution: str, 
                            tool_name: str, system_info: Dict[str, Any]) -> bool:
         """

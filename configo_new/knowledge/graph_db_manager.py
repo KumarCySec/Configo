@@ -111,6 +111,125 @@ class GraphDBManager:
             logger.error(f"Failed to add tool node: {e}")
             return False
     
+    def add_tool(self, name: str, category: str, description: str = "") -> bool:
+        """
+        Add a tool with basic information.
+        
+        Args:
+            name: Tool name
+            category: Tool category
+            description: Tool description
+            
+        Returns:
+            bool: Success status
+        """
+        metadata = {
+            'description': description,
+            'category': category,
+            'version': ''
+        }
+        return self.add_tool_node(name, metadata)
+    
+    def log_error_fix(self, error_text: str, fix_command: str, tool_name: str = None) -> bool:
+        """
+        Log an error and its fix to the graph.
+        
+        Args:
+            error_text: The error message
+            fix_command: The command that fixes it
+            tool_name: Name of the tool (optional)
+            
+        Returns:
+            bool: Success status
+        """
+        if not self.connected:
+            return False
+        
+        try:
+            with self.driver.session() as session:
+                # Add error node
+                query = """
+                MERGE (e:Error {text: $error_text})
+                SET e.tool = $tool_name,
+                    e.created_at = datetime()
+                RETURN e
+                """
+                
+                session.run(query, {
+                    'error_text': error_text,
+                    'tool_name': tool_name or 'unknown'
+                })
+                
+                # Add fix node
+                query = """
+                MERGE (f:Fix {command: $fix_command})
+                SET f.created_at = datetime()
+                RETURN f
+                """
+                
+                session.run(query, {
+                    'fix_command': fix_command
+                })
+                
+                # Create relationship
+                query = """
+                MATCH (e:Error {text: $error_text})
+                MATCH (f:Fix {command: $fix_command})
+                MERGE (e)-[r:FIXED_BY]->(f)
+                SET r.created_at = datetime()
+                RETURN r
+                """
+                
+                result = session.run(query, {
+                    'error_text': error_text,
+                    'fix_command': fix_command
+                })
+                
+                result.single()
+                logger.info(f"Logged error fix: {error_text[:50]}...")
+                return True
+        except Exception as e:
+            logger.error(f"Failed to log error fix: {e}")
+            return False
+    
+    def query_recommended_tools(self, persona: str) -> List[Dict[str, Any]]:
+        """
+        Query for recommended tools based on persona.
+        
+        Args:
+            persona: Developer persona (e.g., 'full stack ai', 'web developer')
+            
+        Returns:
+            List[Dict[str, Any]]: Recommended tools
+        """
+        if not self.connected:
+            return []
+        
+        try:
+            with self.driver.session() as session:
+                query = """
+                MATCH (t:Tool)
+                WHERE t.category IN ['language', 'framework', 'tool']
+                RETURN t.name as name, t.description as description, t.category as category
+                ORDER BY t.name
+                LIMIT 10
+                """
+                
+                result = session.run(query)
+                tools = []
+                
+                for record in result:
+                    tools.append({
+                        'name': record['name'],
+                        'description': record['description'],
+                        'category': record['category']
+                    })
+                
+                return tools
+        except Exception as e:
+            logger.error(f"Failed to query recommended tools: {e}")
+            return []
+    
     def add_plan_node(self, plan_name: str, plan_data: Dict[str, Any]) -> bool:
         """
         Add an installation plan node to the graph.

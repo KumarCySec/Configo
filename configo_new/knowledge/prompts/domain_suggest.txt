@@ -1,0 +1,41 @@
+Analyze the development domain "{domain}" and suggest the most appropriate tools and setup.
+
+Return a JSON response with this structure:
+{
+    "domain": "{domain}",
+    "analysis": {
+        "description": "What this domain involves",
+        "complexity": "beginner|intermediate|advanced",
+        "typical_use_cases": ["use_case1", "use_case2"]
+    },
+    "essential_tools": [
+        {
+            "name": "tool_name",
+            "priority": "critical|high|medium|low",
+            "reason": "Why this tool is essential"
+        }
+    ],
+    "optional_tools": [
+        {
+            "name": "tool_name",
+            "use_case": "When to use this tool"
+        }
+    ],
+    "development_workflow": [
+        "step1",
+        "step2"
+    ],
+    "common_pitfalls": [
+        {
+            "issue": "Common problem",
+            "solution": "How to avoid or fix it"
+        }
+    ]
+}
+
+Focus on:
+- Real-world development practices
+- Tools that work well together
+- Common development workflows
+- Industry standards and best practices
+- Tools that are actually used by professionals 

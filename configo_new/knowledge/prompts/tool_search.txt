@@ -1,0 +1,35 @@
+Search for the most popular and essential developer tools for {domain} development.
+
+Return a JSON response with this structure:
+{
+    "domain": "{domain}",
+    "tools": [
+        {
+            "name": "tool_name",
+            "description": "What this tool does",
+            "category": "language|framework|tool|database|service",
+            "official_install_command": "Installation command for Ubuntu/Linux",
+            "version_check_command": "Command to check if installed",
+            "common_errors": [
+                {
+                    "error": "Error message",
+                    "fix": "How to fix it"
+                }
+            ],
+            "dependencies": ["dependency1", "dependency2"],
+            "related_tools": ["related_tool1", "related_tool2"]
+        }
+    ],
+    "recommended_stack": [
+        "essential_tool1",
+        "essential_tool2"
+    ]
+}
+
+Focus on:
+- Current, popular tools (2024-2025)
+- Official installation methods
+- Common Ubuntu/Linux installation issues
+- Tool relationships and dependencies
+- Essential tools that developers actually use
+- Tools that work well together 

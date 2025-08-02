@@ -10,6 +10,7 @@ import logging
 import json
 from typing import Dict, List, Any, Optional
 from pathlib import Path
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +28,10 @@ class KnowledgeEngine:
         self.config = config
         self.graph_manager = None
         self.vector_manager = None
+        self.gemini_scraper = None
         
         self._initialize_managers()
+        self._initialize_gemini_scraper()
         logger.info("CONFIGO Knowledge Engine initialized")
     
     def _initialize_managers(self) -> None:
@@ -68,6 +71,25 @@ class KnowledgeEngine:
         except Exception as e:
             logger.warning(f"Failed to initialize knowledge managers: {e}")
             logger.info("Knowledge features will be limited")
+    
+    def _initialize_gemini_scraper(self) -> None:
+        """Initialize the Gemini scraper."""
+        try:
+            from .gemini_scraper import GeminiScraper
+            
+            # Get Gemini API key from config
+            gemini_api_key = None
+            if self.config:
+                gemini_api_key = getattr(self.config, 'gemini_api_key', None)
+            
+            self.gemini_scraper = GeminiScraper(api_key=gemini_api_key)
+            logger.info("Gemini scraper initialized")
+        except ImportError:
+            logger.warning("Gemini scraper not available")
+            self.gemini_scraper = None
+        except Exception as e:
+            logger.error(f"Failed to initialize Gemini scraper: {e}")
+            self.gemini_scraper = None
     
     def add_tool_knowledge(self, tool_name: str, metadata: Dict[str, Any]) -> bool:
         """
@@ -425,4 +447,156 @@ class KnowledgeEngine:
             return True
         except Exception as e:
             logger.error(f"Failed to clear knowledge base: {e}")
+            return False
+    
+    def log_event(self, event_type: str, data: Dict[str, Any]) -> bool:
+        """
+        Log an event to the knowledge base.
+        
+        Args:
+            event_type: Type of event (install, error, search, etc.)
+            data: Event data
+            
+        Returns:
+            bool: Success status
+        """
+        try:
+            # Log to vector store
+            if self.vector_manager:
+                content = f"{event_type}: {str(data)}"
+                metadata = {
+                    'type': event_type,
+                    'timestamp': datetime.now().isoformat(),
+                    **data
+                }
+                self.vector_manager.add_document(content, metadata)
+            
+            # Log to graph if relevant
+            if self.graph_manager and event_type in ['install', 'error', 'tool']:
+                if event_type == 'install':
+                    self.graph_manager.add_installation_result(
+                        data.get('tool_name', 'unknown'),
+                        data.get('success', False),
+                        data.get('system_info', {}),
+                        data.get('error_message')
+                    )
+                elif event_type == 'error':
+                    self.graph_manager.log_error_fix(
+                        data.get('error_message', ''),
+                        data.get('fix_command', ''),
+                        data.get('tool_name')
+                    )
+            
+            return True
+        except Exception as e:
+            logger.error(f"Failed to log event: {e}")
+            return False
+    
+    def get_similar_fixes(self, error_message: str) -> List[Dict[str, Any]]:
+        """
+        Get similar fixes for an error.
+        
+        Args:
+            error_message: Error message
+            
+        Returns:
+            List[Dict[str, Any]]: Similar fixes
+        """
+        try:
+            # Search vector store
+            if self.vector_manager:
+                return self.vector_manager.search_similar_errors(error_message)
+            
+            return []
+        except Exception as e:
+            logger.error(f"Failed to get similar fixes: {e}")
+            return []
+    
+    def recommend_stack(self, domain_profile: str) -> Dict[str, Any]:
+        """
+        Recommend tools for a domain profile.
+        
+        Args:
+            domain_profile: Domain profile (e.g., 'full stack ai')
+            
+        Returns:
+            Dict[str, Any]: Recommended stack
+        """
+        try:
+            # Use Gemini scraper if available
+            if self.gemini_scraper and self.gemini_scraper.is_connected():
+                return self.gemini_scraper.search_tools_for_domain(domain_profile)
+            
+            # Fallback to graph query
+            if self.graph_manager:
+                tools = self.graph_manager.query_recommended_tools(domain_profile)
+                return {
+                    'domain': domain_profile,
+                    'tools': tools,
+                    'recommended_stack': [tool['name'] for tool in tools[:5]]
+                }
+            
+            return {
+                'domain': domain_profile,
+                'tools': [],
+                'recommended_stack': []
+            }
+        except Exception as e:
+            logger.error(f"Failed to recommend stack: {e}")
+            return {
+                'domain': domain_profile,
+                'tools': [],
+                'recommended_stack': []
+            }
+    
+    def expand_graph_from_gemini(self, domain: str) -> bool:
+        """
+        Expand knowledge graph using Gemini scraper.
+        
+        Args:
+            domain: Domain to expand
+            
+        Returns:
+            bool: Success status
+        """
+        try:
+            if not self.gemini_scraper or not self.gemini_scraper.is_connected():
+                return False
+            
+            # Get tools from Gemini
+            tools_data = self.gemini_scraper.search_tools_for_domain(domain)
+            
+            if not self.graph_manager:
+                return False
+            
+            # Add tools to graph
+            for tool in tools_data.get('tools', []):
+                self.graph_manager.add_tool(
+                    tool['name'],
+                    tool['category'],
+                    tool['description']
+                )
+                
+                # Add relationships
+                for related_tool in tool.get('related_tools', []):
+                    self.graph_manager.add_relationship(
+                        tool['name'],
+                        related_tool,
+                        'RELATED_TO'
+                    )
+            
+            # Add to vector store
+            if self.vector_manager:
+                content = f"Domain: {domain}\nTools: {[tool['name'] for tool in tools_data.get('tools', [])]}"
+                metadata = {
+                    'type': 'domain',
+                    'domain': domain,
+                    'timestamp': datetime.now().isoformat()
+                }
+                self.vector_manager.add_document(content, metadata)
+            
+            logger.info(f"Expanded graph for domain: {domain}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to expand graph from Gemini: {e}")
             return False 

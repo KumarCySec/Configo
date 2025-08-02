@@ -123,8 +123,9 @@ Examples:
     
     # Knowledge commands
     knowledge_parser = subparsers.add_parser('knowledge', help='Knowledge base operations')
-    knowledge_parser.add_argument('action', choices=['stats', 'backup', 'clear'], help='Knowledge action')
+    knowledge_parser.add_argument('action', choices=['stats', 'backup', 'clear', 'refresh'], help='Knowledge action')
     knowledge_parser.add_argument('--path', help='Backup path')
+    knowledge_parser.add_argument('--domain', help='Domain for refresh')
     
     # Global options
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
@@ -371,6 +372,17 @@ def handle_knowledge(args: argparse.Namespace, ui: EnhancedTerminalUI, knowledge
                 ui.show_error_message("Failed to clear knowledge base")
         else:
             ui.show_info_message("Knowledge base clear cancelled")
+    elif args.action == 'refresh':
+        domain = args.domain or ui.get_user_input("Enter domain to refresh (e.g., 'full stack ai'): ")
+        if domain:
+            ui.show_info_message(f"Refreshing knowledge for domain: {domain}")
+            success = knowledge.expand_graph_from_gemini(domain)
+            if success:
+                ui.show_success_message(f"Successfully refreshed knowledge for {domain}")
+            else:
+                ui.show_error_message(f"Failed to refresh knowledge for {domain}")
+        else:
+            ui.show_error_message("No domain specified")
 
 
 def handle_interactive_mode(ui: EnhancedTerminalUI, agent: AgentEngine, installer: Installer,
