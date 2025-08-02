@@ -49,7 +49,7 @@ setup(
         "Topic :: Utilities",
     ],
     package_dir={"": "."},
-    packages=find_packages(include=["core", "agent", "knowledge", "memory", "ui"]),
+    packages=find_packages(include=["cli", "core", "agent", "knowledge", "memory", "ui", "config"]),
     python_requires=">=3.8",
     install_requires=read_requirements(),
     extras_require={
@@ -68,7 +68,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "configo=main:main",
+            "configo=cli.main:main",
         ],
     },
     include_package_data=True,

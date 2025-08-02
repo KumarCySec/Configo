@@ -12,10 +12,11 @@ import os
 import logging
 from pathlib import Path
 
-# Add the current directory to Python path
-sys.path.insert(0, str(Path(__file__).parent))
+# Add the project root to Python path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
-from config import Config
+from config.config import Config
 from knowledge.engine import KnowledgeEngine
 from memory.memory_store import MemoryStore
 from agent.agent_engine import AgentEngine
