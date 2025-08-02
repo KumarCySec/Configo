@@ -58,7 +58,6 @@ def setup_logging(debug: bool = False) -> None:
         level=log_level,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler('configo.log'),
             logging.StreamHandler(sys.stdout) if debug else logging.NullHandler()
         ]
     )
