@@ -37,9 +37,12 @@ pip install -r requirements.txt
 2. **Set up environment variables (optional):**
 ```bash
 # Neo4j Configuration
-export NEO4J_URI="bolt://localhost:7687"
+export NEO4J_URI="neo4j+s://bae36d7a.databases.neo4j.io"
 export NEO4J_USERNAME="neo4j"
-export NEO4J_PASSWORD="your_password"
+export NEO4J_PASSWORD="fHzFOT-Dt5rmLeAMidCisXq2NkSA4k4fHVaISy6UB0U"
+export NEO4J_DATABASE="neo4j"
+export AURA_INSTANCEID="bae36d7a"
+export AURA_INSTANCENAME="Instance01"
 
 # Knowledge Layer Configuration
 export CONFIGO_KNOWLEDGE_ENABLED="true"
@@ -124,9 +127,12 @@ python scripts/knowledge_cli.py demo
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `NEO4J_URI` | None | Neo4j database URI |
+| `NEO4J_URI` | neo4j+s://bae36d7a.databases.neo4j.io | Neo4j database URI |
 | `NEO4J_USERNAME` | neo4j | Neo4j username |
-| `NEO4J_PASSWORD` | password | Neo4j password |
+| `NEO4J_PASSWORD` | fHzFOT-Dt5rmLeAMidCisXq2NkSA4k4fHVaISy6UB0U | Neo4j password |
+| `NEO4J_DATABASE` | neo4j | Neo4j database name |
+| `AURA_INSTANCEID` | bae36d7a | Neo4j Aura instance ID |
+| `AURA_INSTANCENAME` | Instance01 | Neo4j Aura instance name |
 | `CONFIGO_GRAPH_ENABLED` | true | Enable graph database |
 | `CONFIGO_VECTOR_ENABLED` | true | Enable vector database |
 | `CONFIGO_KNOWLEDGE_ENABLED` | true | Enable knowledge engine |

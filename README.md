@@ -81,9 +81,12 @@ MEM0_API_KEY=your_mem0_api_key_here  # Optional
 LOG_LEVEL=INFO
 
 # Knowledge Layer Configuration (Optional)
-NEO4J_URI=bolt://localhost:7687  # Neo4j database URI
+NEO4J_URI=neo4j+s://bae36d7a.databases.neo4j.io  # Neo4j Aura database URI
 NEO4J_USERNAME=neo4j             # Neo4j username
-NEO4J_PASSWORD=your_password     # Neo4j password
+NEO4J_PASSWORD=fHzFOT-Dt5rmLeAMidCisXq2NkSA4k4fHVaISy6UB0U  # Neo4j password
+NEO4J_DATABASE=neo4j             # Neo4j database name
+AURA_INSTANCEID=bae36d7a         # Neo4j Aura instance ID
+AURA_INSTANCENAME=Instance01     # Neo4j Aura instance name
 CONFIGO_KNOWLEDGE_ENABLED=true   # Enable knowledge layer
 CONFIGO_GRAPH_ENABLED=true       # Enable graph database
 CONFIGO_VECTOR_ENABLED=true      # Enable vector database
