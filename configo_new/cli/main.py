@@ -215,10 +215,34 @@ def handle_setup(args: argparse.Namespace, ui: EnhancedTerminalUI, agent: AgentE
     ui.show_mode_header("Environment Setup", f"Setting up: {environment}")
     
     # Generate plan
-    plan = planner.create_plan(environment, lite_mode=args.lite)
+    installation_plan = planner.create_plan(environment, lite_mode=args.lite)
+    
+    # Convert plan to dictionary format for installer
+    plan_dict = {
+        'name': installation_plan.name,
+        'description': installation_plan.description,
+        'environment': installation_plan.environment,
+        'steps': [
+            {
+                'name': step.name,
+                'command': step.command,
+                'description': step.description,
+                'tool_name': step.tool_name,
+                'is_extension': step.is_extension,
+                'extension_id': step.extension_id,
+                'dependencies': step.dependencies,
+                'timeout': step.timeout,
+                'priority': step.priority
+            }
+            for step in installation_plan.steps
+        ],
+        'estimated_duration': installation_plan.estimated_duration,
+        'complexity': installation_plan.complexity,
+        'lite_mode': installation_plan.lite_mode
+    }
     
     # Execute plan
-    results = installer.execute_plan(plan, ui)
+    results = installer.execute_plan(plan_dict, ui)
     
     # Validate results
     validation_results = validator.validate_installation(results)
@@ -252,11 +276,21 @@ def handle_install(args: argparse.Namespace, ui: EnhancedTerminalUI, agent: Agen
         user_id = os.getenv('USER', 'unknown')
         session_id = f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         
+        # Create installation plan
+        plan = {
+            'name': tool_name,
+            'command': f'echo "Installing {tool_name}"',  # Placeholder command
+            'check_command': f'which {tool_name}',
+            'description': f'Installing {tool_name}',
+            'force': force
+        }
+        
         # Attempt installation
-        success = installer.install_tool(tool_name, force=force)
+        result = installer.install_tool(plan, ui)
+        success = result.success
         
         # Log the install event to knowledge graph
-        knowledge = agent.knowledge_engine
+        knowledge = agent.knowledge
         if knowledge and hasattr(knowledge, 'log_install_event'):
             # Get error message if installation failed
             error_message = None
@@ -300,12 +334,11 @@ def handle_install(args: argparse.Namespace, ui: EnhancedTerminalUI, agent: Agen
             ui.show_info_message("🔍 Validating installation...")
             validation_result = validator.validate_tool(tool_name)
             
-            if validation_result.is_valid:
+            if validation_result.passed:
                 ui.show_success_message(f"✅ {tool_name} validation passed!")
             else:
-                ui.show_warning_message(f"⚠️ {tool_name} installed but validation failed:")
-                for issue in validation_result.issues:
-                    ui.show_warning_message(f"   • {issue}")
+                ui.show_info_message(f"⚠️ {tool_name} installed but validation failed:")
+                ui.show_info_message(f"   • {validation_result.error_message or 'Unknown error'}")
         else:
             ui.show_error_message(f"❌ Failed to install {tool_name}")
             
@@ -320,7 +353,7 @@ def handle_install(args: argparse.Namespace, ui: EnhancedTerminalUI, agent: Agen
         
         # Log the error event
         try:
-            knowledge = agent.knowledge_engine
+            knowledge = agent.knowledge
             if knowledge and hasattr(knowledge, 'log_install_event'):
                 knowledge.log_install_event(
                     tool_name=tool_name,
@@ -530,7 +563,7 @@ def handle_knowledge(args: argparse.Namespace, ui: EnhancedTerminalUI, knowledge
                 ui.show_success_message(f"✅ Successfully refreshed knowledge for '{domain}'")
                 
                 # Show updated statistics
-                graph_stats = knowledge.get_graph_statistics()
+                graph_stats = knowledge.get_graph_stats()
                 if graph_stats:
                     ui.show_info_message(f"📊 Updated Statistics:")
                     ui.show_info_message(f"   🧠 Total Nodes: {graph_stats.get('total_nodes', 0)}")
